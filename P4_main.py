@@ -1,7 +1,7 @@
 from P4_def_verification import *
 from P4_def_tours import *
 
-while 0==0:
+while True:
     #On choisi le mode de jeu    
     mode_de_jeu = ["JvJ", "JvO"]
     print(mode_de_jeu)
