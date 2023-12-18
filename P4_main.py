@@ -2,6 +2,7 @@ from P4_def_verification import *
 from P4_def_tours import *
 
 while 0==0:
+    #On choisi le mode de jeu    
     mode_de_jeu = ["JvJ", "JvO"]
     print(mode_de_jeu)
     m_d_j = input("Quel mode de jeu ? : ")
@@ -10,6 +11,8 @@ while 0==0:
     else:
         plateau = [[" " for i in range(7)] for i in range(6)]
         if m_d_j == "JvJ":
+            #Donc en mode de jeu Joueur contre Joueur 
+            #On appelle donc a chaque tour un Joueur a jouer
             J1 = input("nom du premier joueur :")
             J2 = input("nom du deuxième joueur :")
             for tour in range(1, 43):
@@ -31,6 +34,8 @@ while 0==0:
                     break
 
         if m_d_j == "JvO":
+            #Et donc en mode de jeu Joueur contre Ordi
+            #On appelle donc le joueur a jouer un tour sur deux
             J1 = input("nom du joueur :")
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
