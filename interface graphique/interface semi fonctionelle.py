@@ -14,7 +14,7 @@ class ConnectFour:
         self.j2_couleur = (255, 255, 0)
         self.fond = (0, 0, 255)
         self.rond = (255, 255, 255)
-        self.fps = 60
+        self.fps = 30
         # pour metre en plain ecran
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
@@ -43,7 +43,7 @@ class ConnectFour:
     def placer_pion(self, colone):
         """
         input:
-        colone: coloneone ou on place le pion
+        colone: colone ou on place le pion
         
         ajoute un nouveau pion sur le plateau
         
@@ -111,11 +111,15 @@ class ConnectFour:
         None
         """
         while not self.fin_partie:
-            #ferme la fenetre si on appui sur le boutton croix en haut
+            #ferme la fenetre si on appui sur le boutton croix en haut ou sur la touche echap
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type==pygame.KEYDOWN:
+                        if event.key==pygame.K_ESCAPE:
+                                pygame.quit()
+                                sys.exit()
                 #fait bouger le pion en haut
                 elif event.type == pygame.MOUSEMOTION:
                     pygame.draw.rect(self.screen, self.fond, (0, 0, self.largeur * self.taile_plateau, self.taile_plateau))
@@ -128,7 +132,6 @@ class ConnectFour:
                     ligne = self.hauteur - 1 - self.plateau[self.hauteur - 1 - self.plateau[colone].count(0)].count(0)
                     if self.placer_pion(colone):
                         if self.chercher_gagnant(ligne, colone):
-                            print(f"Player {self.joueur_actuel} wins!")
                             self.fin_partie = True
                         else:
                             self.changer_joueur()
