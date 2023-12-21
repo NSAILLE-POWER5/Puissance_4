@@ -6,9 +6,10 @@ class ConnectFour:
     def __init__(self):
         pygame.init()
         #les constantes du programme
+
         self.largeur = 7
         self.hauteur = 6
-        self.taile_plateau = 100
+        self.taile_plateau = 120
         self.rayon = self.taile_plateau // 2 - 5
         self.j1_couleur = (255, 0, 0)
         self.j2_couleur = (255, 255, 0)
@@ -21,6 +22,7 @@ class ConnectFour:
         self.plateau = [[0] * self.largeur for _ in range(self.hauteur)]
         self.joueur_actuel = 1
         self.fin_partie = False
+        self.taille = pygame.display.get_surface().get_size()
 
     def dessiner_plateau(self):
         """
@@ -118,14 +120,14 @@ class ConnectFour:
                     sys.exit()
                 #fait bouger le pion en haut
                 elif event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, self.fond, (0, 0, self.largeur * self.taile_plateau, self.taile_plateau))
+                    pygame.draw.rect(self.screen, self.fond, (0, 0, self.taille[0] , self.taille[1]))
                     colone = event.pos[0] // self.taile_plateau
                     pygame.draw.circle(self.screen, self.j1_couleur if self.joueur_actuel == 1 else self.j2_couleur,
                                        (colone * self.taile_plateau + self.taile_plateau // 2, self.taile_plateau // 2), self.rayon)
                 #fait tomber le pion
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     colone = event.pos[0] // self.taile_plateau
-                    ligne = self.hauteur - 1 - self.plateau[self.hauteur - 1 - self.plateau[colone].count(0)].count(0)
+                    ligne= event.pos[1] // self.taile_plateau
                     if self.placer_pion(colone):
                         if self.chercher_gagnant(ligne, colone):
                             print(f"Player {self.joueur_actuel} wins!")
