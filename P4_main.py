@@ -19,8 +19,8 @@ while True:
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
-                    tour_J(couleur, plateau)
-                    if Verification(couleur, plateau)==True:
+                    where = tour_J(couleur, plateau)
+                    if Verification(where[0], where[1], plateau)==True:
                         print(J1, "a gagné")
                         victory = True
 
@@ -43,17 +43,19 @@ while True:
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
-                    bosseman = J1
-                    tour_J(couleur, plateau)
+                    where = tour_J(couleur, plateau)
+                    if Verification(where[0], where[1], plateau)==True:
+                        print(J1, "a gagné")
+                        victory = True
                     
                 else:
                     couleur = "o"
-                    bosseman = "Monsieur Ordinateur"
-                    tour_O(couleur, plateau)
+                    where = tour_O(couleur, plateau)
+                    if Verification(where[0], where[1], plateau)==True:
+                        print("Monsieur Ordinateur a gagné")
+                        victory = True
                 
                 for l in plateau:
                     print(l)
-                
-                if Verification(couleur, plateau)==True:
-                    print(bosseman, "a gagné")
+                if victory:
                     break
