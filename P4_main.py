@@ -15,22 +15,25 @@ while True:
             #On appelle donc a chaque tour un Joueur a jouer
             J1 = input("nom du premier joueur :")
             J2 = input("nom du deuxième joueur :")
+            victory = False
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
-                    bosseman = J1
                     tour_J(couleur, plateau)
+                    if Verification(couleur, plateau)==True:
+                        print(J1, "a gagné")
+                        victory = True
 
                 else:
                     couleur = "o"
-                    bosseman = J2
-                    tour_J(couleur, plateau)
+                    where = tour_J(couleur, plateau)
+                    if Verification(where, couleur, plateau)==True:
+                        print(J2, "a gagné")
+                        victory = True
 
                 for l in plateau:
                     print(l)
-                    
-                if Verification(couleur, plateau)==True:
-                    print(bosseman, "a gagné")
+                if victory:
                     break
 
         if m_d_j == "JvO":
