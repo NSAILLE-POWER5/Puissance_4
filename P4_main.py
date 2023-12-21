@@ -42,6 +42,7 @@ while True:
             #Et donc en mode de jeu Joueur contre Ordi
             #On appelle donc le joueur a jouer un tour sur deux
             J1 = input("nom du joueur :")
+            victory = False
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
