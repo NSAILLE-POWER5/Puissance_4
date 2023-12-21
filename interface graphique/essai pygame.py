@@ -4,13 +4,15 @@ import sys
 pygame.init()
 
 ecran = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-
 image = pygame.image.load("grille.png").convert_alpha()
 taille_ecran = pygame.display.get_surface().get_size()
 taille_img = image.get_size()
+image=pygame.transform.scale(image, (1000,  850))
+
 difx = taille_ecran[0] - taille_img[0]
 dify = taille_ecran[1] - taille_img[1]
-x = difx // 2
+
+x = difx // 2;
 y = dify // 2
 
 clock = pygame.time.Clock()
