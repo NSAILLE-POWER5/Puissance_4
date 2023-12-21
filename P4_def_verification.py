@@ -1,7 +1,7 @@
 LIGNES = 6
 COLONNES = 7
 
-def vertification(ligne: int, colonne: int, plateau: list[list[bool | None]]) -> bool | None:
+def Verification(ligne: int, colonne: int, plateau: list[list[bool | None]]) -> bool | None:
     """Renvoie si la position donnée est gagnante, ou `None` si aucun des deux n'ont gagné."""
     verifications = [
         ((1,  0), [(1,  0), (2,  0), (3,  0)]), # Horizontale
@@ -11,7 +11,7 @@ def vertification(ligne: int, colonne: int, plateau: list[list[bool | None]]) ->
     ]
 
     pion = plateau[ligne][colonne]
-    if pion == None:
+    if pion == " ":
         return None
 
     for (direction, verif) in verifications:
@@ -28,5 +28,5 @@ def vertification(ligne: int, colonne: int, plateau: list[list[bool | None]]) ->
                     gagne = False
                     break
             if gagne:
-                return pion
+                return True
     return None

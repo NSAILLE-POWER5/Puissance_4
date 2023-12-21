@@ -27,7 +27,7 @@ while True:
                 else:
                     couleur = "o"
                     where = tour_J(couleur, plateau)
-                    if Verification(where, couleur, plateau)==True:
+                    if Verification(where[0], where[1], plateau)==True:
                         print(J2, "a gagné")
                         victory = True
 
