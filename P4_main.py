@@ -19,6 +19,7 @@ while True:
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
+                    print("à", J1, "de jouer")
                     where = tour_J(couleur, plateau)
                     if Verification(where[0], where[1], plateau)==True:
                         print(J1, "a gagné")
@@ -26,6 +27,7 @@ while True:
 
                 else:
                     couleur = "o"
+                    print("à", J2, "de jouer")
                     where = tour_J(couleur, plateau)
                     if Verification(where[0], where[1], plateau)==True:
                         print(J2, "a gagné")
@@ -43,6 +45,7 @@ while True:
             for tour in range(1, 43):
                 if (tour//2)!=(tour/2):
                     couleur = "x"
+                    print("à", J1, "de jouer")
                     where = tour_J(couleur, plateau)
                     if Verification(where[0], where[1], plateau)==True:
                         print(J1, "a gagné")
