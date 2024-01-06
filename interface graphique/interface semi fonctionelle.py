@@ -1,12 +1,10 @@
 import pygame
 import sys
 
-
 class ConnectFour:
     def __init__(self):
         pygame.init()
-        #les constantes du programme
-
+        # Les constantes du programme
         self.largeur = 7
         self.hauteur = 6
         self.taile_plateau = 120
@@ -16,7 +14,7 @@ class ConnectFour:
         self.fond = (0, 0, 255)
         self.rond = (255, 255, 255)
         self.fps = 30
-        # pour metre en plain ecran
+        # Pour mettre en plein écran
         self.screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         self.clock = pygame.time.Clock()
         self.plateau = [[0] * self.largeur for _ in range(self.hauteur)]
@@ -26,31 +24,45 @@ class ConnectFour:
 
     def dessiner_plateau(self):
         """
-        input:
+        Actualise le plateau en le centrant dans la fenêtre.
+        Appelé à chaque tour de la boucle principale.
+
+        Input:
         None
-        
-        actualise le plateau
-        appelé a chaque tour de la boucle principale
-        
-        return:
+
+        Output:
         None
         """
         for ligne in range(self.hauteur):
             for colone in range(self.largeur):
-                pygame.draw.rect(self.screen, self.fond, (colone * self.taile_plateau, (ligne + 1) * self.taile_plateau, self.taile_plateau, self.taile_plateau))
-                pygame.draw.circle(self.screen, self.rond if self.plateau[ligne][colone] == 0 else (self.j1_couleur if self.plateau[ligne][colone] == 1 else self.j2_couleur),
-                (colone * self.taile_plateau + self.taile_plateau // 2, (ligne + 1) * self.taile_plateau + self.taile_plateau // 2), self.rayon)
+                # Calcul des coordonnées pour centrer le plateau
+                x = colone * self.taile_plateau + (self.taille[0] - self.largeur * self.taile_plateau) // 2
+                y = (ligne + 1) * self.taile_plateau + (
+                            self.taille[1] - (self.hauteur + 1) * self.taile_plateau) // 2
 
+                # Dessin du rectangle pour représenter l'emplacement de chaque cellule du plateau
+                pygame.draw.rect(self.screen, self.fond, (x, y, self.taile_plateau, self.taile_plateau))
+
+                # Dessin du cercle en fonction de l'occupation de la cellule
+                if self.plateau[ligne][colone] == 1:
+                    pygame.draw.circle(self.screen, self.j1_couleur,
+                                       (x + self.taile_plateau // 2, y + self.taile_plateau // 2), self.rayon)
+                elif self.plateau[ligne][colone] == 2:
+                    pygame.draw.circle(self.screen, self.j2_couleur,
+                                       (x + self.taile_plateau // 2, y + self.taile_plateau // 2), self.rayon)
+                else:
+                    pygame.draw.circle(self.screen, self.rond,
+                                       (x + self.taile_plateau // 2, y + self.taile_plateau // 2), self.rayon)
 
     def placer_pion(self, colone):
         """
-        input:
-        colone: colone ou on place le pion
-        
-        ajoute un nouveau pion sur le plateau
-        
-        return:
-        True si possible sinon False
+        Ajoute un nouveau pion sur le plateau.
+
+        Input:
+        colone: Colonne où on place le pion
+
+        Output:
+        True si possible, sinon False
         """
         for ligne in range(self.hauteur - 1, -1, -1):
             if self.plateau[ligne][colone] == 0:
@@ -58,17 +70,16 @@ class ConnectFour:
                 return True
         return False
 
-
     def chercher_gagnant(self, ligne, colone):
         """
-        input:
-        ligne: ligne du pion centrae de la recherche
-        colone: coloneone du pion centrale de la recherche
-        
-        tres mal fait je sais mais c'est pas a moi de m'en occuper
-        
-        return:
-        True si un gagnant sinon False
+        Vérifie s'il y a un gagnant à partir d'une position donnée.
+
+        Input:
+        ligne: Ligne du pion central de la recherche
+        colone: Colonne du pion central de la recherche
+
+        Output:
+        True si un gagnant, sinon False
         """
         directions = [(0, 1), (1, 0), (1, 1), (1, -1)]
         for dr, dc in directions:
@@ -89,49 +100,50 @@ class ConnectFour:
                 return True
         return False
 
-
     def changer_joueur(self):
         """
-        input:
+        Change le joueur actuel.
+
+        Input:
         None
-        
-        change le joueur actuel
-        
-        return:
+
+        Output:
         None
         """
         self.joueur_actuel = 3 - self.joueur_actuel
 
     def run(self):
         """
-        input:
+        Boucle principale du jeu.
+
+        Input:
         None
-        
-        boucle principale du jeux
-        
-        return:
+
+        Output:
         None
         """
         while not self.fin_partie:
-            #ferme la fenetre si on appui sur le boutton croix en haut ou sur la touche echap
+            # Ferme la fenêtre si on appuie sur le bouton croix en haut ou sur la touche Echap
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                elif event.type==pygame.KEYDOWN:
-                        if event.key==pygame.K_ESCAPE:
-                                pygame.quit()
-                                sys.exit()
-                #fait bouger le pion en haut
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        pygame.quit()
+                        sys.exit()
+                # Fait bouger le pion en haut
                 elif event.type == pygame.MOUSEMOTION:
-                    pygame.draw.rect(self.screen, self.fond, (0, 0, self.taille[0] , self.taille[1]))
+                    pygame.draw.rect(self.screen, self.fond, (0, 0, self.taille[0], self.taille[1]))
                     colone = event.pos[0] // self.taile_plateau
-                    pygame.draw.circle(self.screen, self.j1_couleur if self.joueur_actuel == 1 else self.j2_couleur,
-                                       (colone * self.taile_plateau + self.taile_plateau // 2, self.taile_plateau // 2), self.rayon)
-                #fait tomber le pion
+                    pygame.draw.circle(self.screen,
+                                       self.j1_couleur if self.joueur_actuel == 1 else self.j2_couleur,
+                                       (colone * self.taile_plateau + self.taile_plateau // 2,
+                                        self.taile_plateau // 2), self.rayon)
+                # Fait tomber le pion
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     colone = event.pos[0] // self.taile_plateau
-                    ligne= event.pos[1] // self.taile_plateau
+                    ligne = event.pos[1] // self.taile_plateau
                     if self.placer_pion(colone):
                         if self.chercher_gagnant(ligne, colone):
                             self.fin_partie = True
@@ -140,7 +152,6 @@ class ConnectFour:
             self.dessiner_plateau()
             pygame.display.flip()
             self.clock.tick(self.fps)
-
 
 game = ConnectFour()
 game.run()
