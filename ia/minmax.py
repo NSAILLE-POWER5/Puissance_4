@@ -1,104 +1,51 @@
-from math import inf
+from ctypes import c_float, c_int, Structure, CDLL, sizeof
 from ia.ia import COLONNES, HUMAIN, LIGNES, ROBOT, Ia, Plateau
-import copy
 
-def evaluate(plateau: Plateau) -> float:
-    valeurs = {
-        2: 1.0,
-        3: 5.0,
-        4: 10000.0
-    }
+class C_PLATEAU(Structure):
+    _fields_ = [("cases", (c_int * 7) * 6)]
 
-    score = 0
-    for adjacents, valeur in valeurs.items():
-        score += plateau.nombre_pions_adjacents_total(ROBOT, adjacents) * valeur
-        score -= plateau.nombre_pions_adjacents_total(HUMAIN, adjacents) * valeur
-    return score
+class C_MINMAX(Structure):
+    _fields_ = [
+        ("score", c_float),
+        ("coups", c_int * 42),
+        ("num_coups", c_int)
+    ]
 
-class Arbre:
-    def __init__(self, plateau: Plateau, joueur: bool, profondeur: int):
-        self.plateau = plateau
-        self.valeur = evaluate(self.plateau)
-        self.coups: list[tuple[int, Arbre]] = []
-        if profondeur <= 0:
-            self.feuille = True
-        else:
-            self.feuille = False
-            for i in range(COLONNES):
-                plateau = copy.deepcopy(self.plateau)
-                valide = plateau.placer(joueur, i)
-                if valide:
-                    self.coups.append((i, Arbre(plateau, not joueur, profondeur - 1)))
+C_CASE_VIDE = 0
+C_CASE_ROBOT = 1
+C_CASE_HUMAIN = 2
 
-    def show(self, profondeur: int = 0):
-        indent = "  " * profondeur
-        print(f"{indent}{self.valeur}")
-        for j in range(LIGNES):
-            print(indent, end="")
-            for i in range(COLONNES):
-                v = self.plateau.t[j][i]
-                if v == HUMAIN:
-                    print("X", end=" ")
-                elif v == ROBOT:
-                    print("O", end=" ")
-                else:
-                    print("`", end=" ")
-            print()
+def plateau_convertion(plateau: Plateau) -> C_PLATEAU:
+    c_plateau = C_PLATEAU()
+    for j in range(LIGNES):
+        for i in range(COLONNES):
+            case = plateau.t[j][i]
+            c_case = C_CASE_VIDE
+            if case == ROBOT:
+                c_case = C_CASE_ROBOT
+            elif case == HUMAIN:
+                c_case = C_CASE_HUMAIN
 
-        if self.feuille:
-            return
-        for coup, enfant in self.coups:
-            print(f"{indent} coup en {coup}:")
-            enfant.show(profondeur + 1)
+            c_plateau.cases[j][i] = c_case
+    return c_plateau
 
-def minmax(plateau: Plateau, joueur: bool, profondeur: int, alpha: float = -inf, beta: float = inf) -> tuple[float, list[int]]:
-    """Renvoie la liste des meilleurs coups proportionellement possibles"""
-    if profondeur <= 0:
-        return (evaluate(plateau), [])
-
-    if joueur == ROBOT:
-        valeur = -inf
-        coups = []
-        for col in range(COLONNES):
-            copie_plateau = copy.deepcopy(plateau)
-            valide = copie_plateau.placer(joueur, col)
-            if not valide:
-                continue
-
-            (valeur_enfant, coups_enfant) = minmax(copie_plateau, not joueur, profondeur - 1, alpha, beta)
-            if valeur_enfant > valeur:
-                valeur = valeur_enfant
-                coups = [ col, *coups_enfant ]
-
-            if valeur > beta: # arreter de rechercher ce sous-arbre
-                break
-            alpha = max(alpha, valeur)
-        return (valeur, coups)
-    else:
-        valeur = inf
-        coups = []
-        for col in range(COLONNES):
-            copie_plateau = copy.deepcopy(plateau)
-            valide = copie_plateau.placer(joueur, col)
-            if not valide:
-                continue
-
-            (valeur_enfant, coups_enfant) = minmax(copie_plateau, not joueur, profondeur - 1, alpha, beta)
-            if valeur_enfant < valeur:
-                valeur = valeur_enfant
-                coups = [ col, *coups_enfant ]
-            if valeur < alpha: # arreter de rechercher ce sous-arbre
-                break
-            beta = min(beta, valeur)
-        return (valeur, coups)
-
-class Minimax(Ia):
+class Minmax(Ia):
     def __init__(self, plateau_initial: Plateau):
         super().__init__(plateau_initial)
 
-    def coup_joueur(self, joueur: bool, colonne: int):
+        libminmax = CDLL("ia/libminmax.so")
+
+        self.minmax = libminmax.minmax
+        self.minmax.argtypes = [C_PLATEAU, c_int, c_int]
+        self.minmax.restype = C_MINMAX
+
+    def coup(self, joueur: bool, colonne: int):
         valide = self.plateau.placer(joueur, colonne)
         assert(valide)
 
     def prediction(self) -> int | None:
-        return super().prediction()
+        p = plateau_convertion(self.plateau)
+        # arguments: plateau, joueur, profondeur
+        m = self.minmax(p, C_CASE_ROBOT, 7)
+        assert(m.num_coups > 0)
+        return m.coups[m.num_coups - 1]

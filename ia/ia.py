@@ -69,7 +69,7 @@ class Ia:
     def __init__(self, plateau_initial: Plateau):
         self.plateau = plateau_initial
 
-    def coup(self, joueur: bool, colonne: int):
+    def coup(self, joueur: bool, colonne: int) -> None:
         """Appeler cette fonction avec le coup effectué par un joueur pour mettre à jour l'état interne du plateau de l'IA.
         Le coup doit être valide."""
         assert False, "Ia est une classe de base, il faut construire une classe enfante"

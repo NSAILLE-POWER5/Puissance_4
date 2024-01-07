@@ -2,7 +2,7 @@ from ia.ia import COLONNES, Ia
 import random
 
 class Aleatoire(Ia):
-    def coup_joueur(self, joueur: bool, colonne: int):
+    def coup(self, joueur: bool, colonne: int):
         valide = self.plateau.placer(joueur, colonne)
         assert(valide)
 

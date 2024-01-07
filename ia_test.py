@@ -1,12 +1,12 @@
 from ia import ia, minmax
-
-
 from time import time
 
-p = ia.Plateau()
+ia = minmax.Minmax(ia.Plateau())
+
+ia.coup(minmax.HUMAIN, 4)
 
 start = time()
-print(minmax.minmax(p, ia.HUMAIN, 5))
+print(ia.prediction())
 end = time()
 
 print(f"search took {end - start}s")
