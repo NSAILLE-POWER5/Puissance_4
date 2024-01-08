@@ -1,15 +1,7 @@
 import pygame
 import sys
 
-
-
-class ConnectFour:
-    def __init__(self):
-        pygame.init()
-        #les constantes du programmeimport pygame
 import sys
-
-
 
 class ConnectFour:
     def __init__(self):
@@ -185,9 +177,17 @@ class ConnectFour:
 
             else:
                 self.screen.fill(self.fond)
-                pygame.draw.rect(self.screen, (125, 125, 125), ((self.taille[0] - 0.4 * self.taille[0]) // 2, (self.taille[1] - 0.5 * self.taille[1]) // 2, 0.4 * self.taille[0], 0.5 * self.taille[1]))
+                menu_rect = pygame.Rect(
+                    (self.taille[0] - 0.4 * self.taille[0]) // 2,
+                    (self.taille[1] - 0.5 * self.taille[1]) // 2,
+                    0.4 * self.taille[0],
+                    0.5 * self.taille[1]
+                )
+
+                pygame.draw.rect(self.screen, (125, 125, 125), menu_rect)
                 
-                self.write_text(font_adress="interface_graphique/font.TTF",
+                font = "interface_graphique/menu_font.ttf"
+                self.write_text(font_adress=font,
                                 text_content="Play",
                                 font_size=48,
                                 pos_x=self.taille[0] // 2,
@@ -199,7 +199,7 @@ class ConnectFour:
                                 reactive=True,
                                 Menu_button=True)
                 
-                self.write_text(font_adress="interface_graphique/font.TTF",
+                self.write_text(font_adress=font,
                                 text_content="Puissance 4",
                                 font_size=56,
                                 pos_x=self.taille[0] // 2,
@@ -212,7 +212,6 @@ class ConnectFour:
                                 Menu_button=False)
             pygame.display.flip()
             self.clock.tick(self.fps)
-
 
 game = ConnectFour()
 game.run()
