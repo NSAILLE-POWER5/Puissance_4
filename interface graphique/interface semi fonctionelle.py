@@ -100,6 +100,7 @@ class ConnectFour:
                 return True
         return False
 
+
     def changer_joueur(self):
         """
         Change le joueur actuel.
