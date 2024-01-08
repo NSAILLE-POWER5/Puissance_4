@@ -108,9 +108,18 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 		};
 	}
 
+	// on commence d'abords par les colonnes au centre, car elles possèdent de meilleur coups en moyenne
+	// cela permet une plus grande optimisation de l'alpha-beta
+	const static int ordre_colonnes[7] = {
+		// 0, 1, 2, 3, 4, 5, 6
+		3, 2, 4, 1, 5, 0, 6
+	};
+
 	if (joueur == ROBOT) {
 		Minmax m = { .score = -INFINITY, .coups = {}, .num_coups = 0 };
-		for (int col = 0; col < COLONNES; col++) {
+		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
+			int col = ordre_colonnes[col_idx];
+
 			Plateau p = *plateau;
 			if (!place(&p, joueur, col)) continue;
 
@@ -126,7 +135,9 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 		return m;
 	} else {
 		Minmax m = { .score = INFINITY, .coups = {}, .num_coups = 0 };
-		for (int col = 0; col < COLONNES; col++) {
+		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
+			int col = ordre_colonnes[col_idx];
+
 			Plateau p = *plateau;
 			if (!place(&p, joueur, col)) continue;
 
