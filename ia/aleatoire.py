@@ -1,5 +1,7 @@
-from ia.ia import COLONNES, Ia
+from ia.ia import Ia
 import random
+
+from plateau import COLONNES
 
 class Aleatoire(Ia):
     def coup(self, joueur: bool, colonne: int):

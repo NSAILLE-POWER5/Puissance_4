@@ -1,5 +1,6 @@
-from ctypes import c_float, c_int, Structure, CDLL, sizeof
-from ia.ia import COLONNES, HUMAIN, LIGNES, ROBOT, Ia, Plateau
+from ctypes import c_float, c_int, Structure, CDLL
+from ia.ia import HUMAIN, ROBOT, Ia
+from plateau import COLONNES, LIGNES, Plateau
 
 class C_PLATEAU(Structure):
     _fields_ = [("cases", (c_int * 7) * 6)]

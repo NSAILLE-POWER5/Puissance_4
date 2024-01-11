@@ -2,6 +2,9 @@ import pygame
 import sys
 
 import sys
+
+import plateau
+import ia.minmax
     
 def draw_button(
     screen: pygame.Surface,
@@ -82,9 +85,7 @@ class Menu:
 
 class ConnectFour:
     def __init__(self):
-        #les constantes du programme
-        self.largeur = 7
-        self.hauteur = 6
+        # les constantes du programme
         self.taile_plateau = 120
         self.rayon = self.taile_plateau // 2 - 5
         self.j1_couleur = (255, 0, 0)
@@ -92,8 +93,10 @@ class ConnectFour:
         self.fond = (0, 0, 255)
         self.rond = (255, 255, 255)
 
-        self.plateau = [[0] * self.largeur for _ in range(self.hauteur)]
-        self.joueur_actuel = 1
+        self.plateau = plateau.Plateau()
+        self.joueur_actuel = plateau.JOUEUR1
+
+        # self.ia = ia.minmax.Minmax(self.plateau)
 
     def draw(self, screen: pygame.Surface):
         """
@@ -104,17 +107,24 @@ class ConnectFour:
         """
         # dessiner le pion actuel
         screen.fill(self.fond)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        colone = mouse_x // self.taile_plateau
-        pygame.draw.circle(screen, self.j1_couleur if self.joueur_actuel == 1 else self.j2_couleur,
-                        (colone * self.taile_plateau + self.taile_plateau // 2, self.taile_plateau // 2), self.rayon)
+        mouse_x, _ = pygame.mouse.get_pos()
+        colonne = mouse_x // self.taile_plateau
+        pygame.draw.circle(screen, self.j1_couleur if self.joueur_actuel == plateau.JOUEUR1 else self.j2_couleur,
+                        (colonne * self.taile_plateau + self.taile_plateau // 2, self.taile_plateau // 2), self.rayon)
 
         # dessiner le plateau
-        for ligne in range(self.hauteur):
-            for colone in range(self.largeur):
-                pygame.draw.rect(screen, self.fond, (colone * self.taile_plateau, (ligne + 1) * self.taile_plateau, self.taile_plateau, self.taile_plateau))
-                pygame.draw.circle(screen, self.rond if self.plateau[ligne][colone] == 0 else (self.j1_couleur if self.plateau[ligne][colone] == 1 else self.j2_couleur),
-                (colone * self.taile_plateau + self.taile_plateau // 2, (ligne + 1) * self.taile_plateau + self.taile_plateau // 2), self.rayon)
+        for ligne in range(plateau.LIGNES):
+            for colonne in range(plateau.COLONNES):
+                pygame.draw.rect(screen, self.fond, (colonne * self.taile_plateau, (ligne + 1) * self.taile_plateau, self.taile_plateau, self.taile_plateau))
+                couleur = self.rond
+                case = self.plateau.t[ligne][colonne]
+                if case == plateau.JOUEUR1:
+                    couleur = self.j1_couleur
+                elif case == plateau.JOUEUR2:
+                    couleur = self.j2_couleur
+                circle_x = colonne * self.taile_plateau + self.taile_plateau // 2
+                circle_y = (ligne + 1) * self.taile_plateau + self.taile_plateau // 2
+                pygame.draw.circle(screen, couleur, (circle_x, circle_y), self.rayon)
 
     def event(self, event: pygame.event.Event) -> bool:
         """
@@ -131,61 +141,17 @@ class ConnectFour:
                 sys.exit()
         # fait tomber le pion
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            colone = event.pos[0] // self.taile_plateau
-            ligne = event.pos[1] // self.taile_plateau
-            if self.placer_pion(colone):
-                if self.chercher_gagnant(ligne, colone):
+            colonne = event.pos[0] // self.taile_plateau
+            if colonne < 0 or colonne >= plateau.COLONNES:
+                return False
+
+            if self.plateau.placer(self.joueur_actuel, colonne):
+                gagner = self.plateau.joueur_a_gagne()
+                if gagner != None:
                     return True
                 else:
                     self.changer_joueur()
         return False
-
-    def placer_pion(self, colone):
-        """
-        input:
-        colone: colone ou on place le pion
-        
-        ajoute un nouveau pion sur le plateau
-        
-        return:
-        True si possible sinon False
-        """
-        for ligne in range(self.hauteur - 1, -1, -1):
-            if self.plateau[ligne][colone] == 0:
-                self.plateau[ligne][colone] = self.joueur_actuel
-                return True
-        return False
-
-
-    def chercher_gagnant(self, ligne, colone):
-        """
-        input:
-        ligne: ligne du pion centrae de la recherche
-        colone: coloneone du pion centrale de la recherche
-        
-        tres mal fait je sais mais c'est pas a moi de m'en occuper
-        
-        return:
-        True si un gagnant sinon False
-        """
-        directions = [(0, 1), (1, 0), (1, 1), (1, -1)]
-        for dr, dc in directions:
-            count = 1
-            for i in range(1, 4):
-                r, c = ligne + i * dr, colone + i * dc
-                if 0 <= r < self.hauteur and 0 <= c < self.largeur and self.plateau[r][c] == self.joueur_actuel:
-                    count += 1
-                else:
-                    break
-            for i in range(1, 4):
-                r, c = ligne - i * dr, colone - i * dc
-                if 0 <= r < self.hauteur and 0 <= c < self.largeur and self.plateau[r][c] == self.joueur_actuel:
-                    count += 1
-                else:
-                    break
-            if count >= 4:
-                return True
-        return False     
 
     def changer_joueur(self):
         """
@@ -197,7 +163,10 @@ class ConnectFour:
         return:
         None
         """
-        self.joueur_actuel = 3 - self.joueur_actuel
+        if self.joueur_actuel == plateau.JOUEUR1:
+            self.joueur_actuel = plateau.JOUEUR2
+        else:
+            self.joueur_actuel = plateau.JOUEUR1
 
 pygame.init()
 screen = pygame.display.set_mode(size=(400, 400), flags=pygame.RESIZABLE)
