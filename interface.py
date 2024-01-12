@@ -58,6 +58,10 @@ class Menu:
                     self.mode_ai-=1
                 else:
                     self.mode_ai+=1
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
         return False
 
     def draw(self, screen: pygame.Surface):
