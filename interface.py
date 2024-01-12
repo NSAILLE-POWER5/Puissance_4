@@ -50,7 +50,7 @@ class Menu:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:
+        elif event.type == pygame.MOUSEBUTTONDOWN: 
             if self.launch_hovered:
                 return True
             if self.mode_hovered:
@@ -172,21 +172,22 @@ class ConnectFour:
                 sys.exit()
         # fait tomber le pion
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            colonne = event.pos[0] // self.taille_plateau
-            if colonne < 0 or colonne >= plateau.COLONNES:
-                return False
+            if event.button == 1:      
+                colonne = event.pos[0] // self.taille_plateau
+                if colonne < 0 or colonne >= plateau.COLONNES:
+                    return False
 
-            if self.plateau.placer(self.joueur_actuel, colonne):
-                gagner = self.plateau.joueur_a_gagne()
-                if gagner != None:
-                    print(gagner, "à gagner")
-                    return True
-                elif plateau.TOUR==41:
-                    print("égalité")
-                    return True
-                else:
-                    self.changer_joueur()
-                    plateau.TOUR+=1
+                if self.plateau.placer(self.joueur_actuel, colonne):
+                    gagner = self.plateau.joueur_a_gagne()
+                    if gagner != None:
+                        print(gagner, "à gagner")
+                        return True
+                    elif plateau.TOUR==41:
+                        print("égalité")
+                        return True
+                    else:
+                        self.changer_joueur()
+                        plateau.TOUR+=1
         return False
 
     def changer_joueur(self):
