@@ -5,7 +5,8 @@ import sys
 
 import plateau
 import ia.minmax
-    
+tour=0
+
 def draw_button(
     screen: pygame.Surface,
     font: pygame.font.Font,
@@ -86,8 +87,8 @@ class Menu:
 class ConnectFour:
     def __init__(self):
         # les constantes du programme
-        self.taile_plateau = 120
-        self.rayon = self.taile_plateau // 2 - 5
+        self.taille_plateau = 80
+        self.rayon = self.taille_plateau // 2 - 5
         self.j1_couleur = (255, 0, 0)
         self.j2_couleur = (255, 255, 0)
         self.fond = (0, 0, 255)
@@ -108,22 +109,22 @@ class ConnectFour:
         # dessiner le pion actuel
         screen.fill(self.fond)
         mouse_x, _ = pygame.mouse.get_pos()
-        colonne = mouse_x // self.taile_plateau
+        colonne = mouse_x // self.taille_plateau
         pygame.draw.circle(screen, self.j1_couleur if self.joueur_actuel == plateau.JOUEUR1 else self.j2_couleur,
-                        (colonne * self.taile_plateau + self.taile_plateau // 2, self.taile_plateau // 2), self.rayon)
+                        (colonne * self.taille_plateau + self.taille_plateau // 2, self.taille_plateau // 2), self.rayon)
 
         # dessiner le plateau
         for ligne in range(plateau.LIGNES):
             for colonne in range(plateau.COLONNES):
-                pygame.draw.rect(screen, self.fond, (colonne * self.taile_plateau, (ligne + 1) * self.taile_plateau, self.taile_plateau, self.taile_plateau))
+                pygame.draw.rect(screen, self.fond, (colonne * self.taille_plateau, (ligne + 1) * self.taille_plateau, self.taille_plateau, self.taille_plateau))
                 couleur = self.rond
                 case = self.plateau.t[ligne][colonne]
                 if case == plateau.JOUEUR1:
                     couleur = self.j1_couleur
                 elif case == plateau.JOUEUR2:
                     couleur = self.j2_couleur
-                circle_x = colonne * self.taile_plateau + self.taile_plateau // 2
-                circle_y = (ligne + 1) * self.taile_plateau + self.taile_plateau // 2
+                circle_x = colonne * self.taille_plateau + self.taille_plateau // 2
+                circle_y = (ligne + 1) * self.taille_plateau + self.taille_plateau // 2
                 pygame.draw.circle(screen, couleur, (circle_x, circle_y), self.rayon)
 
     def event(self, event: pygame.event.Event) -> bool:
@@ -131,7 +132,7 @@ class ConnectFour:
         S'occupe d'un seul evenement
         Renvoie si la partie est terminée
         """
-        # ferme la fenetre si on appui sur le boutton croix en haut ou sur la touche echap
+        # ferme la fenetre si on appuie sur le boutton croix en haut ou sur la touche echap
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
@@ -141,16 +142,21 @@ class ConnectFour:
                 sys.exit()
         # fait tomber le pion
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            colonne = event.pos[0] // self.taile_plateau
+            colonne = event.pos[0] // self.taille_plateau
             if colonne < 0 or colonne >= plateau.COLONNES:
                 return False
 
             if self.plateau.placer(self.joueur_actuel, colonne):
                 gagner = self.plateau.joueur_a_gagne()
                 if gagner != None:
+                    print(gagner, "à gagner")
+                    return True
+                elif plateau.TOUR==41:
+                    print("égalité")
                     return True
                 else:
                     self.changer_joueur()
+                    plateau.TOUR+=1
         return False
 
     def changer_joueur(self):
@@ -183,6 +189,7 @@ while True:
     if current_state == MENU:
         for event in pygame.event.get():
             if menu.event(event):
+                plateau.TOUR=0
                 current_state = GAME
                 print("changing state")
         menu.draw(pygame.display.get_surface())

@@ -1,8 +1,9 @@
 LIGNES = 6
 COLONNES = 7
 
-JOUEUR1 = False
+JOUEUR1 = "Michaël"
 JOUEUR2 = True
+TOUR = 0
 
 class Plateau:
     def __init__(self):
