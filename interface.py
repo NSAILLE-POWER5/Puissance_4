@@ -18,9 +18,9 @@ def draw_button(
     """Renvoie si le bouton est survolé"""
     render_text = font.render(text, True, font_color, bg_color)
     rect = render_text.get_rect()
-    rect.center = pos
     rect.width += padding[0]
     rect.height += padding[1]
+    rect.center = pos
     hovered = rect_hovered(rect)
     if hovered:
         pygame.draw.rect(screen, bg_color, rect)
