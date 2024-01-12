@@ -41,6 +41,9 @@ class Menu:
     def __init__(self):
         self.fond = (0, 0, 255)
         self.launch_hovered = False
+        self.mode_hovered = False
+        self.mode_ai = 1
+        self.mode_text = ("Joueur contre joueur", "Joueur contre AI")
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
@@ -50,6 +53,11 @@ class Menu:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if self.launch_hovered:
                 return True
+            if self.mode_hovered:
+                if self.mode_ai==1:
+                    self.mode_ai-=1
+                else:
+                    self.mode_ai+=1
         return False
 
     def draw(self, screen: pygame.Surface):
@@ -77,7 +85,25 @@ class Menu:
         font = pygame.font.Font("interface_graphique/menu_font.ttf", 48)
         self.launch_hovered = draw_button(
             screen, font, "Play",
-            pos=(taille[0] // 2, taille[1] // 2),
+            pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 16),
+            padding=(100, 50),
+            bg_color=pygame.Color(140, 140, 140),
+            hovered_color=pygame.Color(110, 110, 110),
+            font_color=pygame.Color(0, 0, 0)
+        )
+
+        font = pygame.font.Font("interface_graphique/menu_font.ttf", 26)
+        render_text = font.render("mode actuel :", True, (255,  255,  255), (125, 125, 125))
+        rect = render_text.get_rect()
+        rect.width += 20
+        rect.height += 10
+        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 16)
+        text_rect = render_text.get_rect(center=rect.center)
+        screen.blit(render_text, text_rect)
+
+        self.mode_hovered = draw_button(
+            screen, font, self.mode_text[self.mode_ai],
+            pos=(taille[0] // 2, taille[1] // 2 + 2 * taille[1] // 16),
             padding=(100, 50),
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
@@ -97,7 +123,7 @@ class ConnectFour:
         self.plateau = plateau.Plateau()
         self.joueur_actuel = plateau.JOUEUR1
 
-        # self.ia = ia.minmax.Minmax(self.plateau)
+        #self.ia = ia.minmax.Minmax(self.plateau)
 
     def draw(self, screen: pygame.Surface):
         """
@@ -175,7 +201,7 @@ class ConnectFour:
             self.joueur_actuel = plateau.JOUEUR1
 
 pygame.init()
-screen = pygame.display.set_mode(size=(400, 400), flags=pygame.RESIZABLE)
+screen = pygame.display.set_mode(size=(1920, 1080), flags=pygame.RESIZABLE)
 clock = pygame.time.Clock()
 
 menu = Menu()
