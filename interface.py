@@ -205,7 +205,7 @@ class ConnectFour:
             self.joueur_actuel = plateau.JOUEUR1
 
 pygame.init()
-screen = pygame.display.set_mode(size=(1920, 1080), flags=pygame.RESIZABLE)
+screen = pygame.display.set_mode(size=(400, 400), flags=pygame.RESIZABLE)
 clock = pygame.time.Clock()
 
 menu = Menu()
