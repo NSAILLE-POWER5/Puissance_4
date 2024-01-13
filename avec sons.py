@@ -181,6 +181,7 @@ MENU = False
 GAME = True
 current_state = MENU
 sound = Sound()
+sound.jouer_musique_menu()
 
 
 
@@ -189,12 +190,14 @@ while True:
         for event in pygame.event.get():
             if menu.event(event):
                 current_state = GAME
-                print("changing state")
+                sound.jouer_musique_jeu()
+                print("Changement d'état")
         menu.draw(pygame.display.get_surface())
     else:
         for event in pygame.event.get():
             if game.event(event):
                 current_state = MENU
+                sound.jouer_musique_menu()
                 game = ConnectFour()
         game.draw(screen)
     pygame.display.flip()
