@@ -6,9 +6,8 @@ from ia import minmax
 from sounds import Sound
 import plateau
 import ia.minmax
-tour=0
-LASTWINNER = None
 
+LASTWINNER = None
 def draw_button(
     screen: pygame.Surface,
     font: pygame.font.Font,
@@ -104,21 +103,6 @@ class Menu:
         rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 16)
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
-
-        if LASTWINNER!=None:
-            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32)
-
-            render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
-            if LASTWINNER:
-                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
-            else:
-                render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
-            rect = render_text.get_rect()
-            rect.width += 20
-            rect.height += 10
-            rect.center = (taille[0] // 2, taille[1] // 7)
-            text_rect = render_text.get_rect(center=rect.center)
-            screen.blit(render_text, text_rect)
 
         self.mode_hovered = draw_button(
             screen, font, self.mode_text[self.mode_ai],
@@ -241,6 +225,10 @@ game = ConnectFour()
 
 MENU = 0
 GAME = 1
+END_GAME = 2
+
+end_game_ticks = 0
+
 current_state = MENU
 sound = Sound()
 sound.jouer_musique_menu()
@@ -254,12 +242,34 @@ while True:
                     game.ia = minmax.Minmax()
                 sound.jouer_musique_jeu()
         menu.draw(pygame.display.get_surface())
-    else:
+    elif current_state == GAME:
         for event in pygame.event.get():
             if game.event(event):
-                current_state = MENU
+                current_state = END_GAME
+                end_game_ticks = 0
                 sound.jouer_musique_menu()
-                game = ConnectFour()
         game.draw(screen)
+    else:
+        if LASTWINNER != None:
+            taille = screen.get_size()
+            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32)
+
+            render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
+            if LASTWINNER:
+                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
+            else:
+                render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
+            rect = render_text.get_rect()
+            rect.width += 20
+            rect.height += 10
+            rect.center = (taille[0] // 2, taille[1] // 7)
+            text_rect = render_text.get_rect(center=rect.center)
+            screen.blit(render_text, text_rect)
+            pygame.display.flip()
+
+        end_game_ticks += 1
+        if end_game_ticks > 60: # 2 seconds passed
+            current_state = MENU
+            game = ConnectFour()
     pygame.display.flip()
     clock.tick(30)
