@@ -1,12 +1,14 @@
 import pygame
 import sys
 
-import sys
-
+import ia
+from ia import minmax
+from sounds import Sound
 import plateau
 import ia.minmax
 tour=0
 LASTWINNER = None
+
 def draw_button(
     screen: pygame.Surface,
     font: pygame.font.Font,
@@ -42,7 +44,7 @@ class Menu:
         self.fond = (0, 0, 255)
         self.launch_hovered = False
         self.mode_hovered = False
-        self.mode_ai = 1
+        self.mode_ai = 0
         self.mode_text = ("Joueur contre joueur", "Joueur contre AI")
 
     def event(self, event: pygame.event.Event) -> bool:
@@ -54,10 +56,8 @@ class Menu:
             if self.launch_hovered:
                 return True
             if self.mode_hovered:
-                if self.mode_ai==1:
-                    self.mode_ai-=1
-                else:
-                    self.mode_ai+=1
+                # boucle `mode_ai` entre 0 et 1
+                self.mode_ai = (self.mode_ai + 1) % 2
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -146,7 +146,7 @@ class ConnectFour:
         self.plateau = plateau.Plateau()
         self.joueur_actuel = plateau.JOUEUR1
 
-        #self.ia = ia.minmax.Minmax(self.plateau)
+        self.ia: ia.Ia | None = None
 
     def draw(self, screen: pygame.Surface):
         """
@@ -191,24 +191,30 @@ class ConnectFour:
                 sys.exit()
         # fait tomber le pion
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:      
+            if event.button == 1:
+                sound.pion()      
                 colonne = event.pos[0] // self.taille_plateau
                 if colonne < 0 or colonne >= plateau.COLONNES:
                     return False
 
                 if self.plateau.placer(self.joueur_actuel, colonne):
+                    if self.ia != None:
+                        self.changer_joueur()
+                        coup = self.ia.prediction(self.plateau)
+                        if coup != None: # si coup == None, un des joueurs a gagné
+                            self.plateau.placer(self.joueur_actuel, coup)
+
                     gagner = self.plateau.joueur_a_gagne()
                     if gagner != None:
                         print(gagner, self.joueur_actuel,"à gagner")
                         global LASTWINNER
                         LASTWINNER = gagner
                         return True
-                    elif plateau.TOUR==41:
+                    elif self.plateau.tour == 41:
                         print("égalité")
                         return True
                     else:
                         self.changer_joueur()
-                        plateau.TOUR+=1
         return False
 
     def changer_joueur(self):
@@ -233,22 +239,26 @@ clock = pygame.time.Clock()
 menu = Menu()
 game = ConnectFour()
 
-MENU = False
-GAME = True
+MENU = 0
+GAME = 1
 current_state = MENU
+sound = Sound()
+sound.jouer_musique_menu()
 
 while True:
     if current_state == MENU:
         for event in pygame.event.get():
             if menu.event(event):
-                plateau.TOUR=0
                 current_state = GAME
-                print("changing state")
+                if menu.mode_ai == 1:
+                    game.ia = minmax.Minmax()
+                sound.jouer_musique_jeu()
         menu.draw(pygame.display.get_surface())
     else:
         for event in pygame.event.get():
             if game.event(event):
                 current_state = MENU
+                sound.jouer_musique_menu()
                 game = ConnectFour()
         game.draw(screen)
     pygame.display.flip()

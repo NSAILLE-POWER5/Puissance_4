@@ -4,17 +4,18 @@ class Sound:
 
     def __init__(self):
         pygame.mixer.init()  # Initialiser le module mixer
-        self.menu_music = pygame.mixer.music.load("menu.mp3")
-        self.jeu_music = pygame.mixer.music.load("fondsonore.mp3")
-
         self.pion_sound = pygame.mixer.Sound("pion.mp3")
         self.pion_sound.set_volume(0.5)
+        self.music = 0
 
     def pion(self):
         self.pion_sound.play()
 
     def jouer_musique_jeu(self):
-        pygame.mixer.music.load("fondsonore.mp3")  # Chargez la musique du jeu
+        if self.music == 0: # Chargez la musique du jeu
+            pygame.mixer.music.load("fondsonore.mp3")
+        else:
+            pygame.mixer.music.load("ia_hard")
         pygame.mixer.music.play(loops=-1, start=1.25)
         pygame.mixer.music.set_volume(0.25)
 

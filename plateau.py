@@ -3,11 +3,11 @@ COLONNES = 7
 
 JOUEUR1 = False
 JOUEUR2 = True
-TOUR = 0
 
 class Plateau:
     def __init__(self):
         self.t: list[list[bool | None]] = [[None for _ in range(7)] for _ in range(6)]
+        self.tour = 0
     
     def placer(self, joueur: bool, colonne: int) -> bool:
         """Place un pion dans la colonne `colonne` (index commence à 0).
@@ -21,6 +21,7 @@ class Plateau:
             return False
 
         self.t[ligne_max][colonne] = joueur
+        self.tour += 1
         return True
 
     def nombre_pions_adjacents(self, ligne: int, colonne: int, joueur: bool, n: int) -> int:
