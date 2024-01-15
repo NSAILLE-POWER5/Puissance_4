@@ -39,7 +39,7 @@ class Minmax(Ia):
         elif platform_name == "Linux":
             library_name = "libminmax.so"
         else:
-            libminmax = "libminmax.dylib"
+            raise Exception("platforme non supportée")
 
         libminmax = cdll.LoadLibrary("ia/" + library_name)
 
