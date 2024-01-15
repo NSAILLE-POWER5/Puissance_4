@@ -8,8 +8,7 @@ class C_PLATEAU(Structure):
 class C_MINMAX(Structure):
     _fields_ = [
         ("score", c_float),
-        ("coups", c_int * 42),
-        ("num_coups", c_int)
+        ("coup", c_int),
     ]
 
 C_CASE_VIDE = 0
@@ -31,22 +30,15 @@ def plateau_convertion(plateau: Plateau) -> C_PLATEAU:
     return c_plateau
 
 class Minmax(Ia):
-    def __init__(self, plateau_initial: Plateau):
-        super().__init__(plateau_initial)
-
+    def __init__(self):
         libminmax = CDLL("ia/libminmax.so")
 
         self.minmax = libminmax.minmax
         self.minmax.argtypes = [C_PLATEAU, c_int, c_int]
         self.minmax.restype = C_MINMAX
 
-    def coup(self, joueur: bool, colonne: int):
-        valide = self.plateau.placer(joueur, colonne)
-        assert(valide)
-
-    def prediction(self) -> int | None:
-        p = plateau_convertion(self.plateau)
+    def prediction(self, plateau: Plateau) -> int | None:
+        p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
         m = self.minmax(p, C_CASE_ROBOT, 7)
-        assert(m.num_coups > 0)
-        return m.coups[m.num_coups - 1]
+        return None if m.coup == -1 else m.coup

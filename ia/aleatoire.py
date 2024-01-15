@@ -1,17 +1,13 @@
 from ia.ia import Ia
 import random
 
-from plateau import COLONNES
+from plateau import COLONNES, Plateau
 
 class Aleatoire(Ia):
-    def coup(self, joueur: bool, colonne: int):
-        valide = self.plateau.placer(joueur, colonne)
-        assert(valide)
-
-    def prediction(self) -> int | None:
+    def prediction(self, plateau: Plateau) -> int | None:
         colonnes_valides = []
         for col in range(COLONNES):
-            if self.plateau.t[0][col] == None: # vérifie que la première ligne de la colonne est vide
+            if plateau.t[0][col] == None: # vérifie que la première ligne de la colonne est vide
                 colonnes_valides.append(col)
 
         if len(colonnes_valides) == 0:

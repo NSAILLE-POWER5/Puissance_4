@@ -53,7 +53,7 @@ static float evaluate(Plateau *plateau) {
 
 			for (int dir = 0; dir < 4; dir++) {
 				int idx = 1;
-				for (; idx < 4; idx++) {
+				while (idx < 4) {
 					int dx = i + dirs[dir][0]*idx;
 					int dy = j + dirs[dir][1]*idx;
 
@@ -61,11 +61,13 @@ static float evaluate(Plateau *plateau) {
 
 					Case autre = plateau->cases[dy][dx];
 					if (c != autre) break;
+
+					idx++;
 				}
 
-				if (idx == 1) score += 1.0 * multiplier;
-				else if (idx == 2) score += 5.0 * multiplier;
-				else if (idx == 3) score += 100000.0 * multiplier;
+				if (idx == 2) score += 1.0 * multiplier;
+				else if (idx == 3) score += 5.0 * multiplier;
+				else if (idx == 4) return INFINITY * multiplier;
 			}
 		}
 	}
@@ -83,28 +85,24 @@ float minf(float a, float b) {
 
 typedef struct {
 	float score;
-	/// 42 coups max, tout l'espace de l'array n'est pas forcément utilisé
-	/// l'ordre des coups renvoyé est inversé (utilisé comme une pile)
-	int coups[42];
-	int num_coups;
+	// -1 pour un coup inconnu
+	int coup;
 } Minmax;
 
 static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, float alpha, float beta) {
 	if (profondeur <= 0) {
 		return (Minmax) {
 			.score = evaluate(plateau),
-			.coups = {},
-			.num_coups = 0
+			.coup = -1
 		};
 	}
 
 	float current_score = evaluate(plateau);
-	// le joueur a gagné, il est inutil d'aller plus loin
-	if (current_score > 10000.0 || current_score < -10000.0) {
+	// le joueur a gagné, il est inutile d'aller plus loin
+	if (current_score == INFINITY || current_score == -INFINITY) {
 		return (Minmax) {
 			.score = current_score,
-			.coups = {},
-			.num_coups = 0
+			.coup = -1
 		};
 	}
 
@@ -116,7 +114,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 	};
 
 	if (joueur == ROBOT) {
-		Minmax m = { .score = -INFINITY, .coups = {}, .num_coups = 0 };
+		Minmax m = { .score = -INFINITY, .coup = -1 };
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
@@ -126,7 +124,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			Minmax coup = internal_minmax(&p, HUMAIN, profondeur - 1, alpha, beta);
 			if (coup.score > m.score) {
 				m = coup;
-				m.coups[m.num_coups++] = col; // ajout du nouveau coup
+				m.coup = col;
 			}
 
 			if (m.score > beta) break;
@@ -134,7 +132,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 		}
 		return m;
 	} else {
-		Minmax m = { .score = INFINITY, .coups = {}, .num_coups = 0 };
+		Minmax m = { .score = INFINITY, .coup = -1 };
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
@@ -144,12 +142,13 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			Minmax coup = internal_minmax(&p, ROBOT, profondeur - 1, alpha, beta);
 			if (coup.score < m.score) {
 				m = coup;
-				m.coups[m.num_coups++] = col; // ajout du nouveau coup
+				m.coup = col;
 			}
 
 			if (m.score < alpha) break;
 			beta = minf(beta, m.score);
 		}
+
 		return m;
 	}
 }
