@@ -1,4 +1,4 @@
-from ia.ia import Ia
+from ia import Ia
 import random
 
 from plateau import COLONNES, Plateau

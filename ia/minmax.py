@@ -1,5 +1,5 @@
 from ctypes import c_float, c_int, Structure, CDLL
-from ia.ia import HUMAIN, ROBOT, Ia
+from ia import HUMAIN, ROBOT, Ia
 from plateau import COLONNES, LIGNES, Plateau
 
 class C_PLATEAU(Structure):
@@ -40,5 +40,5 @@ class Minmax(Ia):
     def prediction(self, plateau: Plateau) -> int | None:
         p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
-        m = self.minmax(p, C_CASE_ROBOT, 7)
+        m = self.minmax(p, C_CASE_ROBOT, 5)
         return None if m.coup == -1 else m.coup
