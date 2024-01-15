@@ -1,7 +1,7 @@
 LIGNES = 6
 COLONNES = 7
 
-JOUEUR1 = "Michaël"
+JOUEUR1 = False
 JOUEUR2 = True
 TOUR = 0
 
