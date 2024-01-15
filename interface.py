@@ -1,8 +1,6 @@
 import pygame
 import sys
-
-import sys
-
+from sounds import Sound
 import plateau
 import ia.minmax
 tour=0
@@ -172,7 +170,8 @@ class ConnectFour:
                 sys.exit()
         # fait tomber le pion
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1:      
+            if event.button == 1:
+                sound.pion()      
                 colonne = event.pos[0] // self.taille_plateau
                 if colonne < 0 or colonne >= plateau.COLONNES:
                     return False
@@ -215,6 +214,8 @@ game = ConnectFour()
 MENU = False
 GAME = True
 current_state = MENU
+sound = Sound()
+sound.jouer_musique_menu()
 
 while True:
     if current_state == MENU:
@@ -222,12 +223,14 @@ while True:
             if menu.event(event):
                 plateau.TOUR=0
                 current_state = GAME
+                sound.jouer_musique_jeu()
                 print("changing state")
         menu.draw(pygame.display.get_surface())
     else:
         for event in pygame.event.get():
             if game.event(event):
                 current_state = MENU
+                sound.jouer_musique_menu()
                 game = ConnectFour()
         game.draw(screen)
     pygame.display.flip()
