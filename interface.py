@@ -240,7 +240,7 @@ while True:
                 current_state = GAME
                 if menu.mode_ai == 1:
                     game.ia = minmax.Minmax()
-                sound.jouer_musique_jeu()
+                sound.jouer_musique_jeu(menu.mode_ai)
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
         for event in pygame.event.get():
