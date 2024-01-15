@@ -101,7 +101,7 @@ class Menu:
         rect = render_text.get_rect()
         rect.width += 20
         rect.height += 10
-        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 16)
+        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 20)
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
 
