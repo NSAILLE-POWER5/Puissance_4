@@ -1,5 +1,5 @@
 # Puissance_4
-Puissance 4 projet de gros bg pour la gouverne de monsieur Ba ;)
+Puissance 4 projet de gros bg pour la gouverne de monsieur Ba.
 bg : Nom commun
 bg \be.ʒe\ masculin et féminin identiques
 
