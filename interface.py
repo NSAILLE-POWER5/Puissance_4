@@ -45,6 +45,10 @@ class Menu:
         self.mode_hovered = False
         self.mode_ia = 0
         self.mode_text = ("Joueur contre joueur", "Joueur contre IA")
+        self.difficulte_hovered = False
+        self.difficulte_ia = 0
+        self.difficulte_text = ("Bebe", "Moyen", "Difficile", "Omnipotent")
+        self.difficulte_profondeur = (2, 5, 8, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
@@ -57,6 +61,8 @@ class Menu:
             if self.mode_hovered:
                 # boucle `mode_ia` entre 0 et 1
                 self.mode_ia = (self.mode_ia + 1) % 2
+            if self.difficulte_hovered:
+                self.difficulte_ia = (self.difficulte_ia + 1) % 4
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -71,7 +77,7 @@ class Menu:
             (taille[0] - 0.4 * taille[0]) // 2,
             (taille[1] - 0.5 * taille[1]) // 2,
             0.4 * taille[0],
-            0.5 * taille[1]
+            0.55 * taille[1]
         )
         pygame.draw.rect(screen, (125, 125, 125), menu_rect)
 
@@ -121,6 +127,7 @@ class Menu:
             rect.center = (taille[0] // 2, taille[1] // 7)
             text_rect = render_text.get_rect(center=rect.center)
             screen.blit(render_text, text_rect)
+
         self.mode_hovered = draw_button(
             screen, font, self.mode_text[self.mode_ia],
             pos=(taille[0] // 2, taille[1] // 2 + 2 * taille[1] // 16),
@@ -129,6 +136,16 @@ class Menu:
             hovered_color=pygame.Color(110, 110, 110),
             font_color=pygame.Color(0, 0, 0)
         )
+
+        if self.mode_ia == 1:
+            self.difficulte_hovered = draw_button(
+                screen, font, self.difficulte_text[self.difficulte_ia],
+                pos=(taille[0] // 2, taille[1] // 2 + 4 * taille[1] // 16),
+                padding=(50, 50),
+                bg_color=pygame.Color(140, 140, 140),
+                hovered_color=pygame.Color(110, 110, 110),
+                font_color=pygame.Color(0, 0, 0)
+            )
 
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
