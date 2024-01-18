@@ -204,18 +204,17 @@ class ConnectFour:
                         coup = self.ia.prediction(self.plateau)
                         if coup != None: # si coup == None, un des joueurs a gagné
                             self.plateau.placer(self.joueur_actuel, coup)
-
+                    global LASTWINNER
                     gagner = self.plateau.joueur_a_gagne()
                     if gagner != None:
                         print(gagner, self.joueur_actuel,"à gagner")
-                        global LASTWINNER
                         if gagner:
                             LASTWINNER = 'J2'
                         else:
                             LASTWINNER='J1'
                         return True
                     elif self.plateau.tour == 42:
-                        print("égalité")
+                        LASTWINNER="egaliter"
                         return True
                     else:
                         self.changer_joueur()
@@ -280,7 +279,7 @@ while True:
             elif LASTWINNER == 'J2':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
             else:
-                render_text = font.render("égaliter ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("Egaliter ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
