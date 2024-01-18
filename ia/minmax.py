@@ -1,4 +1,5 @@
-from ctypes import c_float, c_int, Structure, CDLL
+import platform
+from ctypes import c_float, c_int, Structure, cdll
 from ia import HUMAIN, ROBOT, Ia
 from plateau import COLONNES, LIGNES, Plateau
 
@@ -9,6 +10,7 @@ class C_MINMAX(Structure):
     _fields_ = [
         ("score", c_float),
         ("coup", c_int),
+        ("profondeur", c_int)
     ]
 
 C_CASE_VIDE = 0
@@ -31,7 +33,16 @@ def plateau_convertion(plateau: Plateau) -> C_PLATEAU:
 
 class Minmax(Ia):
     def __init__(self):
-        libminmax = CDLL("ia/libminmax.so")
+        platform_name = platform.uname()[0]
+        library_name = ""
+        if platform_name == "Windows":
+            library_name = "libminmax.dll"
+        elif platform_name == "Linux":
+            library_name = "libminmax.so"
+        else:
+            raise Exception("platforme non supportée")
+
+        libminmax = cdll.LoadLibrary("ia/" + library_name)
 
         self.minmax = libminmax.minmax
         self.minmax.argtypes = [C_PLATEAU, c_int, c_int]
@@ -40,5 +51,5 @@ class Minmax(Ia):
     def prediction(self, plateau: Plateau) -> int | None:
         p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
-        m = self.minmax(p, C_CASE_ROBOT, 5)
+        m = self.minmax(p, C_CASE_ROBOT, 1)
         return None if m.coup == -1 else m.coup
