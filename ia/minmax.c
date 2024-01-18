@@ -87,13 +87,15 @@ typedef struct {
 	float score;
 	// -1 pour un coup inconnu
 	int coup;
+	int profondeur;
 } Minmax;
 
 static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, float alpha, float beta) {
 	if (profondeur <= 0) {
 		return (Minmax) {
 			.score = evaluate(plateau),
-			.coup = -1
+			.coup = -1,
+			.profondeur = profondeur
 		};
 	}
 
@@ -102,7 +104,8 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 	if (current_score == INFINITY || current_score == -INFINITY) {
 		return (Minmax) {
 			.score = current_score,
-			.coup = -1
+			.coup = -1,
+			.profondeur = profondeur
 		};
 	}
 
@@ -114,7 +117,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 	};
 
 	if (joueur == ROBOT) {
-		Minmax m = { .score = -INFINITY, .coup = -1 };
+		Minmax m = { .score = -INFINITY, .coup = -1, .profondeur = -1 };
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
@@ -122,7 +125,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			if (!place(&p, joueur, col)) continue;
 
 			Minmax coup = internal_minmax(&p, HUMAIN, profondeur - 1, alpha, beta);
-			if (coup.score > m.score || m.coup == -1) {
+			if (coup.score > m.score || (coup.score == m.score && coup.profondeur > m.profondeur)) {
 				m = coup;
 				m.coup = col;
 			}
@@ -132,7 +135,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 		}
 		return m;
 	} else {
-		Minmax m = { .score = INFINITY, .coup = -1 };
+		Minmax m = { .score = INFINITY, .coup = -1, .profondeur = -1 };
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
@@ -140,7 +143,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			if (!place(&p, joueur, col)) continue;
 
 			Minmax coup = internal_minmax(&p, ROBOT, profondeur - 1, alpha, beta);
-			if (coup.score < m.score || m.coup == -1) {
+			if (coup.score < m.score || (coup.score == m.score && coup.profondeur > m.profondeur)) {
 				m = coup;
 				m.coup = col;
 			}

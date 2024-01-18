@@ -10,6 +10,7 @@ class C_MINMAX(Structure):
     _fields_ = [
         ("score", c_float),
         ("coup", c_int),
+        ("profondeur", c_int)
     ]
 
 C_CASE_VIDE = 0
