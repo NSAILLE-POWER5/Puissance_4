@@ -40,7 +40,7 @@ def rect_hovered(rect: pygame.Rect) -> bool:
 
 class Menu:
     def __init__(self):
-        self.fond = (0, 0, 255)
+        self.fond = (70, 100, 255)
         self.launch_hovered = False
         self.mode_hovered = False
         self.mode_ai = 0
@@ -124,7 +124,7 @@ class ConnectFour:
         self.rayon = self.taille_plateau // 2 - 5
         self.j1_couleur = (255, 0, 0)
         self.j2_couleur = (255, 255, 0)
-        self.fond = (0, 0, 255)
+        self.fond = (70, 100, 255)
         self.rond = (255, 255, 255)
 
         self.plateau = plateau.Plateau()
@@ -194,7 +194,7 @@ class ConnectFour:
                         global LASTWINNER
                         LASTWINNER = gagner
                         return True
-                    elif self.plateau.tour == 41:
+                    elif self.plateau.tour == 42:
                         print("égalité")
                         return True
                     else:

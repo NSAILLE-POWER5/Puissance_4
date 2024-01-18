@@ -51,5 +51,5 @@ class Minmax(Ia):
     def prediction(self, plateau: Plateau) -> int | None:
         p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
-        m = self.minmax(p, C_CASE_ROBOT, 10)
+        m = self.minmax(p, C_CASE_ROBOT, 1)
         return None if m.coup == -1 else m.coup
