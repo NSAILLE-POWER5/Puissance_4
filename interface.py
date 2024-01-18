@@ -210,9 +210,9 @@ class ConnectFour:
                         print(gagner, self.joueur_actuel,"à gagner")
                         global LASTWINNER
                         if gagner:
-                            LASTWINNER = 'J2'
+                            LASTWINNER = 'J1'
                         else:
-                            LASTWINNER='J1'
+                            LASTWINNER='J2'
                         return True
                     elif self.plateau.tour == 42:
                         print("égalité")
