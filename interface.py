@@ -109,10 +109,12 @@ class Menu:
             font = pygame.font.Font("interface_graphique/menu_font.ttf", 32)
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
-            if LASTWINNER:
+            if LASTWINNER=='J2':
                 render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
-            else:
+            elif LASTWINNER=='J1':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
+            else:
+                render_text = font.render("égaliter ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
@@ -208,7 +210,10 @@ class ConnectFour:
                     if gagner != None:
                         print(gagner, self.joueur_actuel,"à gagner")
                         global LASTWINNER
-                        LASTWINNER = gagner
+                        if gagner:
+                            LASTWINNER = 'J2'
+                        else:
+                            LASTWINNER='J1'
                         return True
                     elif self.plateau.tour == 41:
                         print("égalité")
