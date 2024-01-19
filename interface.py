@@ -49,7 +49,7 @@ class Menu:
         self.mode_text = ("Joueur contre joueur", "Joueur contre IA")
         self.difficulte_hovered = False
         self.difficulte_ia = 0
-        self.difficulte_text = ("Facile", "Moyen", "Difficile", "Omnipotent")
+        self.difficulte_text = ("Facile", "Moyen", "Difficile", "Challengeur")
         self.difficulte_profondeur = (3, 5, 8, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
@@ -108,7 +108,7 @@ class Menu:
         rect = render_text.get_rect()
         rect.width += 20
         rect.height += 10
-        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 16)
+        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 20)
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
 
