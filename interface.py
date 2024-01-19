@@ -226,9 +226,9 @@ class ConnectFour:
                     if gagner != None:
                         print(gagner, self.joueur_actuel,"à gagner")
                         if gagner:
-                            LASTWINNER = 'J1'
-                        else:
                             LASTWINNER='J2'
+                        else:
+                            LASTWINNER='J1'
                         return True
                     elif self.plateau.tour == 42:
                         LASTWINNER="egaliter"
@@ -292,9 +292,9 @@ while True:
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
             if LASTWINNER =='J1':
-                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
-            elif LASTWINNER == 'J2':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
+            elif LASTWINNER =='J2':
+                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
             else:
                 render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
