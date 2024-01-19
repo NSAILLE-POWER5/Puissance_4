@@ -32,7 +32,7 @@ def plateau_convertion(plateau: Plateau) -> C_PLATEAU:
     return c_plateau
 
 class Minmax(Ia):
-    def __init__(self):
+    def __init__(self, profondeur: int):
         platform_name = platform.uname()[0]
         library_name = ""
         if platform_name == "Windows":
@@ -47,9 +47,10 @@ class Minmax(Ia):
         self.minmax = libminmax.minmax
         self.minmax.argtypes = [C_PLATEAU, c_int, c_int]
         self.minmax.restype = C_MINMAX
+        self.profondeur = profondeur
 
     def prediction(self, plateau: Plateau) -> int | None:
         p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
-        m = self.minmax(p, C_CASE_ROBOT, 11)
+        m = self.minmax(p, C_CASE_ROBOT, self.profondeur)
         return None if m.coup == -1 else m.coup

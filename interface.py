@@ -48,7 +48,7 @@ class Menu:
         self.difficulte_hovered = False
         self.difficulte_ia = 0
         self.difficulte_text = ("Bebe", "Moyen", "Difficile", "Omnipotent")
-        self.difficulte_profondeur = (2, 5, 8, 12)
+        self.difficulte_profondeur = (3, 5, 8, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
@@ -276,7 +276,7 @@ while True:
             if menu.event(event):
                 current_state = GAME
                 if menu.mode_ia == 1:
-                    game.ia = minmax.Minmax()
+                    game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
                 sound.jouer_musique_jeu(menu.mode_ia)
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
