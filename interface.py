@@ -43,8 +43,12 @@ class Menu:
         self.fond = (70, 100, 255)
         self.launch_hovered = False
         self.mode_hovered = False
-        self.mode_ai = 0
-        self.mode_text = ("Joueur contre joueur", "Joueur contre AI")
+        self.mode_ia = 0
+        self.mode_text = ("Joueur contre joueur", "Joueur contre IA")
+        self.difficulte_hovered = False
+        self.difficulte_ia = 0
+        self.difficulte_text = ("Bebe", "Moyen", "Difficile", "Omnipotent")
+        self.difficulte_profondeur = (3, 5, 8, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
@@ -55,8 +59,10 @@ class Menu:
             if self.launch_hovered:
                 return True
             if self.mode_hovered:
-                # boucle `mode_ai` entre 0 et 1
-                self.mode_ai = (self.mode_ai + 1) % 2
+                # boucle `mode_ia` entre 0 et 1
+                self.mode_ia = (self.mode_ia + 1) % 2
+            if self.difficulte_hovered:
+                self.difficulte_ia = (self.difficulte_ia + 1) % 4
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -71,7 +77,7 @@ class Menu:
             (taille[0] - 0.4 * taille[0]) // 2,
             (taille[1] - 0.5 * taille[1]) // 2,
             0.4 * taille[0],
-            0.5 * taille[1]
+            0.55 * taille[1]
         )
         pygame.draw.rect(screen, (125, 125, 125), menu_rect)
 
@@ -114,21 +120,32 @@ class Menu:
             elif LASTWINNER=='J1':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
             else:
-                render_text = font.render("égaliter ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
             rect.center = (taille[0] // 2, taille[1] // 7)
             text_rect = render_text.get_rect(center=rect.center)
             screen.blit(render_text, text_rect)
+
         self.mode_hovered = draw_button(
-            screen, font, self.mode_text[self.mode_ai],
+            screen, font, self.mode_text[self.mode_ia],
             pos=(taille[0] // 2, taille[1] // 2 + 2 * taille[1] // 16),
             padding=(100, 50),
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
             font_color=pygame.Color(0, 0, 0)
         )
+
+        if self.mode_ia == 1:
+            self.difficulte_hovered = draw_button(
+                screen, font, self.difficulte_text[self.difficulte_ia],
+                pos=(taille[0] // 2, taille[1] // 2 + 4 * taille[1] // 16),
+                padding=(50, 50),
+                bg_color=pygame.Color(140, 140, 140),
+                hovered_color=pygame.Color(110, 110, 110),
+                font_color=pygame.Color(0, 0, 0)
+            )
 
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
@@ -151,19 +168,19 @@ class ConnectFour:
 
     def draw(self, screen: pygame.Surface):
         """
-        boucle principale du jeux
+        boucle principale du jeu
         
         return:
         None
         """
-        # dessiner le pion actuel
+        # dessine le pion actuel
         screen.fill(self.fond)
         mouse_x, _ = pygame.mouse.get_pos()
         colonne = mouse_x // self.taille_plateau
         pygame.draw.circle(screen, self.j1_couleur if self.joueur_actuel == plateau.JOUEUR1 else self.j2_couleur,
                         (colonne * self.taille_plateau + self.taille_plateau // 2, self.taille_plateau // 2), self.rayon)
 
-        # dessiner le plateau
+        # dessine le plateau
         for ligne in range(plateau.LIGNES):
             for colonne in range(plateau.COLONNES):
                 pygame.draw.rect(screen, self.fond, (colonne * self.taille_plateau, (ligne + 1) * self.taille_plateau, self.taille_plateau, self.taille_plateau))
@@ -209,9 +226,9 @@ class ConnectFour:
                     if gagner != None:
                         print(gagner, self.joueur_actuel,"à gagner")
                         if gagner:
-                            LASTWINNER = 'J2'
+                            LASTWINNER = 'J1'
                         else:
-                            LASTWINNER='J1'
+                            LASTWINNER='J2'
                         return True
                     elif self.plateau.tour == 42:
                         LASTWINNER="egaliter"
@@ -257,9 +274,9 @@ while True:
         for event in pygame.event.get():
             if menu.event(event):
                 current_state = GAME
-                if menu.mode_ai == 1:
-                    game.ia = minmax.Minmax()
-                sound.jouer_musique_jeu(menu.mode_ai)
+                if menu.mode_ia == 1:
+                    game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
+                sound.jouer_musique_jeu(menu.mode_ia)
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
         for event in pygame.event.get():
@@ -279,7 +296,7 @@ while True:
             elif LASTWINNER == 'J2':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
             else:
-                render_text = font.render("Egaliter ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
