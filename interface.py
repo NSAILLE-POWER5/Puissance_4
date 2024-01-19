@@ -1,6 +1,8 @@
 import pygame
 import sys
 
+from pygame.math import clamp
+
 import ia
 from ia import minmax
 from sounds import Sound
@@ -47,7 +49,7 @@ class Menu:
         self.mode_text = ("Joueur contre joueur", "Joueur contre IA")
         self.difficulte_hovered = False
         self.difficulte_ia = 0
-        self.difficulte_text = ("Bebe", "Moyen", "Difficile", "Omnipotent")
+        self.difficulte_text = ("Facile", "Moyen", "Difficile", "Omnipotent")
         self.difficulte_profondeur = (3, 5, 8, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
@@ -154,8 +156,6 @@ class Menu:
 class ConnectFour:
     def __init__(self):
         # les constantes du programme
-        self.taille_plateau = 80
-        self.rayon = self.taille_plateau // 2 - 5
         self.j1_couleur = (255, 0, 0)
         self.j2_couleur = (255, 255, 0)
         self.fond = (70, 100, 255)
@@ -166,6 +166,10 @@ class ConnectFour:
 
         self.ia: ia.Ia | None = None
 
+        # informations nécessaires communiquées entre `event` et `draw`
+        self.plateau_x = 0
+        self.taille_case = 0
+
     def draw(self, screen: pygame.Surface):
         """
         boucle principale du jeu
@@ -173,28 +177,51 @@ class ConnectFour:
         return:
         None
         """
+        largeur, hauteur = screen.get_size()
+
+        # padding: 1/6 de la taille de chaque coté
+        largeur_padde = largeur - largeur//3
+        hauteur_padde = hauteur - hauteur//3
+
+        largeur_plateau = min(largeur_padde, hauteur_padde*7 // 6)
+        hauteur_plateau = min(hauteur_padde, largeur_padde*6 // 7)
+
+        self.plateau_x = largeur // 6 + (largeur_padde - largeur_plateau) // 2 
+        self.plateau_y = hauteur // 6 + (hauteur_padde - hauteur_plateau) // 2
+
+        taille_case = largeur_plateau // 7
+        self.taille_case = taille_case
+        rayon = taille_case//2 - 4
+
         # dessine le pion actuel
         screen.fill(self.fond)
         mouse_x, _ = pygame.mouse.get_pos()
-        colonne = mouse_x // self.taille_plateau
-        pygame.draw.circle(screen, self.j1_couleur if self.joueur_actuel == plateau.JOUEUR1 else self.j2_couleur,
-                        (colonne * self.taille_plateau + self.taille_plateau // 2, self.taille_plateau // 2), self.rayon)
+
+        # remap la souris de [0; largeur] à [0; plateau.COLONNES]
+        mouse_x = clamp((mouse_x - self.plateau_x) // taille_case, 0, plateau.COLONNES-1)
+
+        pygame.draw.circle(
+            screen,
+            self.j1_couleur if self.joueur_actuel == plateau.JOUEUR1 else self.j2_couleur,
+            (self.plateau_x + mouse_x * taille_case + taille_case//2, self.plateau_y - taille_case//2),
+            rayon
+        )
 
         # dessine le plateau
         for ligne in range(plateau.LIGNES):
             for colonne in range(plateau.COLONNES):
-                pygame.draw.rect(screen, self.fond, (colonne * self.taille_plateau, (ligne + 1) * self.taille_plateau, self.taille_plateau, self.taille_plateau))
                 couleur = self.rond
                 case = self.plateau.t[ligne][colonne]
                 if case == plateau.JOUEUR1:
                     couleur = self.j1_couleur
                 elif case == plateau.JOUEUR2:
                     couleur = self.j2_couleur
-                circle_x = colonne * self.taille_plateau + self.taille_plateau // 2
-                circle_y = (ligne + 1) * self.taille_plateau + self.taille_plateau // 2
-                pygame.draw.circle(screen, couleur, (circle_x, circle_y), self.rayon)
 
-    def event(self, event: pygame.event.Event) -> bool:
+                circle_x = self.plateau_x + colonne*taille_case + taille_case//2
+                circle_y = self.plateau_y + ligne*taille_case + taille_case//2
+                pygame.draw.circle(screen, couleur, (circle_x, circle_y), rayon)
+
+    def event(self, screen: pygame.Surface, event: pygame.event.Event) -> bool:
         """
         S'occupe d'un seul evenement
         Renvoie si la partie est terminée
@@ -211,12 +238,13 @@ class ConnectFour:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
                 sound.pion()      
-                colonne = event.pos[0] // self.taille_plateau
+                colonne = int(clamp((event.pos[0] - self.plateau_x) // self.taille_case, 0, plateau.COLONNES))
                 if colonne < 0 or colonne >= plateau.COLONNES:
                     return False
 
                 if self.plateau.placer(self.joueur_actuel, colonne):
                     if self.ia != None:
+                        self.draw(screen)
                         self.changer_joueur()
                         coup = self.ia.prediction(self.plateau)
                         if coup != None: # si coup == None, un des joueurs a gagné
@@ -280,7 +308,7 @@ while True:
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
         for event in pygame.event.get():
-            if game.event(event):
+            if game.event(screen, event):
                 current_state = END_GAME
                 end_game_ticks = 0
                 sound.jouer_musique_menu()
