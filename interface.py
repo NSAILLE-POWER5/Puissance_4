@@ -16,7 +16,8 @@ def draw_button(
     text: str,
     pos: tuple[int, int],
     padding: tuple[int, int],
-    bg_color: pygame.Color, hovered_color: pygame.Color,
+    bg_color: pygame.Color,
+    hovered_color: pygame.Color,
     font_color: pygame.Color
     ) -> bool:
     """Renvoie si le bouton est survolé"""
@@ -27,9 +28,10 @@ def draw_button(
     rect.center = pos
     hovered = rect_hovered(rect)
     if hovered:
-        pygame.draw.rect(screen, bg_color, rect)
-    else:
+        render_text = font.render(text, True, font_color, hovered_color)
         pygame.draw.rect(screen, hovered_color, rect)
+    else:
+        pygame.draw.rect(screen, bg_color, rect)
 
     text_rect = render_text.get_rect(center=rect.center)
     screen.blit(render_text, text_rect)
@@ -75,35 +77,39 @@ class Menu:
         screen.fill(self.fond)
 
         taille = screen.get_size()
+        menu_largeur = 1000 * taille[0] // 1920
+        menu_hauteur = 700 * taille[1] // 1080
         menu_rect = pygame.Rect(
-            (taille[0] - 0.4 * taille[0]) // 2,
-            (taille[1] - 0.5 * taille[1]) // 2,
-            0.4 * taille[0],
-            0.55 * taille[1]
+            menu_largeur//2,
+            menu_hauteur//2,
+            menu_largeur,
+            menu_hauteur
         )
         pygame.draw.rect(screen, (125, 125, 125), menu_rect)
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 56)
+        padding = (100 * taille[0] // 1920, 50 * taille[1] // 1080)
+
+        font = pygame.font.Font("interface_graphique/menu_font.ttf", 56 * taille[1] // 1080)
         draw_button(
             screen, font, "Puissance 4",
             pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 4),
-            padding=(100, 50),
+            padding=padding,
             bg_color=pygame.Color(255, 0, 0),
             hovered_color=pygame.Color(255, 0, 0),
             font_color=pygame.Color(255, 255, 0)
         )
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 48)
+        font = pygame.font.Font("interface_graphique/menu_font.ttf", 48 * taille[1] // 1080)
         self.launch_hovered = draw_button(
             screen, font, "Play",
             pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 16),
-            padding=(100, 50),
+            padding=padding,
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
             font_color=pygame.Color(0, 0, 0)
         )
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 26)
+        font = pygame.font.Font("interface_graphique/menu_font.ttf", 26 * taille[1] // 1080)
         render_text = font.render("mode actuel :", True, (255,  255,  255), (125, 125, 125))
         rect = render_text.get_rect()
         rect.width += 20
@@ -114,7 +120,7 @@ class Menu:
 
 
         if LASTWINNER!=None:
-            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32)
+            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32 * taille[1] // 1080)
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
             if LASTWINNER=='J2':
@@ -133,7 +139,7 @@ class Menu:
         self.mode_hovered = draw_button(
             screen, font, self.mode_text[self.mode_ia],
             pos=(taille[0] // 2, taille[1] // 2 + 2 * taille[1] // 16),
-            padding=(100, 50),
+            padding=padding,
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
             font_color=pygame.Color(0, 0, 0)
@@ -143,7 +149,7 @@ class Menu:
             self.difficulte_hovered = draw_button(
                 screen, font, self.difficulte_text[self.difficulte_ia],
                 pos=(taille[0] // 2, taille[1] // 2 + 4 * taille[1] // 16),
-                padding=(50, 50),
+                padding=padding,
                 bg_color=pygame.Color(140, 140, 140),
                 hovered_color=pygame.Color(110, 110, 110),
                 font_color=pygame.Color(0, 0, 0)
