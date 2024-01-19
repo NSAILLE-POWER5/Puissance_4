@@ -120,7 +120,7 @@ class Menu:
             elif LASTWINNER=='J1':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
             else:
-                render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("egalite ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
