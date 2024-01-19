@@ -120,7 +120,7 @@ class Menu:
             elif LASTWINNER=='J1':
                 render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
             else:
-                render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("egalite ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
@@ -231,7 +231,7 @@ class ConnectFour:
                             LASTWINNER='J1'
                         return True
                     elif self.plateau.tour == 42:
-                        LASTWINNER="egaliter"
+                        LASTWINNER="egalite"
                         return True
                     else:
                         self.changer_joueur()
@@ -296,7 +296,7 @@ while True:
             elif LASTWINNER =='J2':
                 render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
             else:
-                render_text = font.render("égalité ", True, (0,  0,  0), (0, 0, 255))
+                render_text = font.render("egalite ", True, (0,  0,  0), (0, 0, 255))
             rect = render_text.get_rect()
             rect.width += 20
             rect.height += 10
