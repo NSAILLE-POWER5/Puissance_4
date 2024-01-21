@@ -13,15 +13,17 @@ class Sound:
     def pion(self):
         self.pion_sound.play()
 
-    def jouer_musique_jeu(self, mode):
+    def jouer_musique_jeu(self, mode, dif):
         if mode == 0: # Chargez la musique du jeu
             pygame.mixer.music.load("fondsonore.mp3")
             pygame.mixer.music.play(loops=-1, start=3)
             pygame.mixer.music.set_volume(0.15)
         else:
-            pygame.mixer.music.load("ia_hard.mp3")
+            musique = ("easy.mp3", "medium.mp3", "hard.mp3", "demoniaque.mp3")
+            pygame.mixer.music.load(musique[dif])
             pygame.mixer.music.play(loops=-1, start=1.25)
             pygame.mixer.music.set_volume(0.10)
+
 
     def jouer_musique_menu(self):
         pygame.mixer.music.load("menu.mp3")  # Chargez la musique du menu

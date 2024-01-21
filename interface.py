@@ -252,6 +252,7 @@ class ConnectFour:
                     if self.ia != None:
                         self.draw(screen)
                         self.changer_joueur()
+                        pygame.display.flip()
                         coup = self.ia.prediction(self.plateau)
                         if coup != None: # si coup == None, un des joueurs a gagné
                             self.plateau.placer(self.joueur_actuel, coup)
@@ -310,7 +311,7 @@ while True:
                 current_state = GAME
                 if menu.mode_ia == 1:
                     game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
-                sound.jouer_musique_jeu(menu.mode_ia)
+                sound.jouer_musique_jeu(menu.mode_ia, menu.difficulte_ia)
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
         for event in pygame.event.get():
