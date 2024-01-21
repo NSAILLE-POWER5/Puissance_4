@@ -318,6 +318,7 @@ while True:
             if game.event(screen, event):
                 current_state = END_GAME
                 end_game_ticks = 0
+                sound.final()
                 sound.jouer_musique_menu()
         game.draw(screen)
     else:

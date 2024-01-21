@@ -20,9 +20,10 @@ class Sound:
             pygame.mixer.music.set_volume(0.15)
         else:
             musique = ("easy.mp3", "medium.mp3", "hard.mp3", "demoniaque.mp3")
+            volume = (0.15, 0.20, 0.15, 0.15)
             pygame.mixer.music.load(musique[dif])
             pygame.mixer.music.play(loops=-1, start=1.25)
-            pygame.mixer.music.set_volume(0.10)
+            pygame.mixer.music.set_volume(volume[dif])
 
 
     def jouer_musique_menu(self):
