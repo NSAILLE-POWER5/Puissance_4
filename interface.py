@@ -60,19 +60,18 @@ class Menu:
             pygame.quit()
             sys.exit()
         elif event.type == pygame.MOUSEBUTTONDOWN: 
-            if event.button == 1:
-                if self.launch_hovered:
-                    return True
-                if self.mode_hovered:
-                    # boucle `mode_ia` entre 0 et 1
-                    self.mode_ia = (self.mode_ia + 1) % 2
-                if self.difficulte_hovered:
-                    self.difficulte_ia = (self.difficulte_ia + 1) % 4
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    pygame.quit()
-                    sys.exit()
-            return False
+            if self.launch_hovered:
+                return True
+            if self.mode_hovered:
+                # boucle `mode_ia` entre 0 et 1
+                self.mode_ia = (self.mode_ia + 1) % 2
+            if self.difficulte_hovered:
+                self.difficulte_ia = (self.difficulte_ia + 1) % 4
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                pygame.quit()
+                sys.exit()
+        return False
 
     def draw(self, screen: pygame.Surface):
         screen.fill(self.fond)
@@ -319,7 +318,7 @@ while True:
             if game.event(screen, event):
                 current_state = END_GAME
                 end_game_ticks = 0
-                sound.final()
+                sound.final(game.ia, LASTWINNER)
                 sound.jouer_musique_menu()
         game.draw(screen)
     else:

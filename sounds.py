@@ -9,6 +9,9 @@ class Sound:
         self.final_sound = pygame.mixer.Sound("fin.mp3")
         self.final_sound.set_volume(1)
         self.music = 0
+        self.bruh = pygame.mixer.Sound("bruh.mp3")
+        self.bruh.set_volume(1)
+
 
     def pion(self):
         self.pion_sound.play()
@@ -31,5 +34,9 @@ class Sound:
         pygame.mixer.music.play(loops=-1)
         pygame.mixer.music.set_volume(0.5)
 
-    def final(self):
-        self.final_sound.play()
+    def final(self, ia, gagnant):
+        if ia != None and gagnant == "J2":
+            self.bruh.play()
+        else:
+            self.final_sound.play(start=2)
+
