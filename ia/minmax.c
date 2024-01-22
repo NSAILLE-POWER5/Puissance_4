@@ -125,7 +125,7 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			if (!place(&p, joueur, col)) continue;
 
 			Minmax coup = internal_minmax(&p, HUMAIN, profondeur - 1, alpha, beta);
-			if (coup.score > m.score || (coup.score == m.score && coup.profondeur > m.profondeur)) {
+			if (coup.score > m.score || (coup.score == m.score && (coup.score < 0 ^ coup.profondeur > m.profondeur)) || m.profondeur == -1) {
 				m = coup;
 				m.coup = col;
 			}
@@ -143,12 +143,12 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			if (!place(&p, joueur, col)) continue;
 
 			Minmax coup = internal_minmax(&p, ROBOT, profondeur - 1, alpha, beta);
-			if (coup.score < m.score || (coup.score == m.score && coup.profondeur > m.profondeur)) {
+			if (coup.score < m.score || (coup.score == m.score && (coup.score > 0 ^ coup.profondeur > m.profondeur)) || m.profondeur == -1) {
 				m = coup;
 				m.coup = col;
 			}
 
-			if (m.score <= alpha) break;
+			if (m.score < alpha) break;
 			beta = minf(beta, m.score);
 		}
 
