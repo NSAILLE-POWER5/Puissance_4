@@ -80,8 +80,8 @@ class Menu:
         menu_largeur = 1000 * taille[0] // 1920
         menu_hauteur = 700 * taille[1] // 1080
         menu_rect = pygame.Rect(
-            menu_largeur//2.15,
-            menu_hauteur//3,
+            (taille[0] - menu_largeur)//2,
+            (taille[1] - menu_hauteur)//2,
             menu_largeur,
             menu_hauteur
         )
