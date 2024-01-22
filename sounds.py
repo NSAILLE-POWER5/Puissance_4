@@ -38,5 +38,5 @@ class Sound:
         if ia != None and gagnant == "J2":
             self.bruh.play()
         else:
-            self.final_sound.play(start=2)
+            self.final_sound.play()
 
