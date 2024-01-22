@@ -52,7 +52,7 @@ class Menu:
         self.difficulte_hovered = False
         self.difficulte_ia = 0
         self.difficulte_text = ("Facile", "Moyen", "Difficile", "Challengeur")
-        self.difficulte_profondeur = (3, 5, 8, 12)
+        self.difficulte_profondeur = (5, 8, 10, 12)
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
