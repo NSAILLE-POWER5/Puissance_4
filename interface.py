@@ -249,7 +249,7 @@ class ConnectFour:
                     return False
 
                 if self.plateau.placer(self.joueur_actuel, colonne):
-                    if self.ia != None:
+                    if self.ia != None and self.plateau.joueur_a_gagne() != None:
                         self.draw(screen)
                         self.changer_joueur()
                         pygame.display.flip()
