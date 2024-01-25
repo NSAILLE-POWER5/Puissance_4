@@ -324,7 +324,7 @@ while True:
     else:
         if LASTWINNER != None:
             taille = screen.get_size()
-            font = pygame.font.Font(" menu_font.ttf", 32)
+            font = pygame.font.Font("menu_font.ttf", 32)
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
             if LASTWINNER =='J1':
