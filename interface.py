@@ -259,7 +259,6 @@ class ConnectFour:
                     global LASTWINNER
                     gagner = self.plateau.joueur_a_gagne()
                     if gagner != None:
-                        print(gagner, self.joueur_actuel,"à gagner")
                         if gagner:
                             LASTWINNER='J2'
                         else:
