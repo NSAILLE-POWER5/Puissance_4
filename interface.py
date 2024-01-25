@@ -89,7 +89,7 @@ class Menu:
 
         padding = (100 * taille[0] // 1920, 50 * taille[1] // 1080)
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 56 * taille[1] // 1080)
+        font = pygame.font.Font("menu_font.ttf", 56 * taille[1] // 1080)
         draw_button(
             screen, font, "Puissance 4",
             pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 4),
@@ -99,7 +99,7 @@ class Menu:
             font_color=pygame.Color(255, 255, 0)
         )
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 48 * taille[1] // 1080)
+        font = pygame.font.Font("menu_font.ttf", 48 * taille[1] // 1080)
         self.launch_hovered = draw_button(
             screen, font, "Play",
             pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 16),
@@ -109,7 +109,7 @@ class Menu:
             font_color=pygame.Color(0, 0, 0)
         )
 
-        font = pygame.font.Font("interface_graphique/menu_font.ttf", 26 * taille[1] // 1080)
+        font = pygame.font.Font("menu_font.ttf", 26 * taille[1] // 1080)
         render_text = font.render("mode actuel :", True, (255,  255,  255), (125, 125, 125))
         rect = render_text.get_rect()
         rect.width += 20
@@ -120,7 +120,7 @@ class Menu:
 
 
         if LASTWINNER!=None:
-            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32 * taille[1] // 1080)
+            font = pygame.font.Font("menu_font.ttf", 32 * taille[1] // 1080)
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
             if LASTWINNER=='J2':
@@ -324,7 +324,7 @@ while True:
     else:
         if LASTWINNER != None:
             taille = screen.get_size()
-            font = pygame.font.Font("interface_graphique/menu_font.ttf", 32)
+            font = pygame.font.Font(" menu_font.ttf", 32)
 
             render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
             if LASTWINNER =='J1':
