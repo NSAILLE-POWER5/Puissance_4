@@ -341,7 +341,7 @@ while True:
             pygame.display.flip()
 
         end_game_ticks += 1
-        if end_game_ticks > 60: # 2 seconds passed
+        if end_game_ticks > 180: # 6 seconds passed
             current_state = MENU
             game = ConnectFour()
     pygame.display.flip()
