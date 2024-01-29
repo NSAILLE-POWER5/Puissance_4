@@ -53,6 +53,9 @@ class Menu:
         self.difficulte_ia = 0
         self.difficulte_text = ("Facile", "Moyen", "Difficile", "Challengeur")
         self.difficulte_profondeur = (5, 8, 10, 12)
+        self.premier_joueur = 0
+        self.premier_joueur_texte = ("1er joueur: Humain", "1er joueur: Robot")
+        self.premier_joueur_hovered = False
 
     def event(self, event: pygame.event.Event) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
@@ -67,6 +70,8 @@ class Menu:
                 self.mode_ia = (self.mode_ia + 1) % 2
             if self.difficulte_hovered:
                 self.difficulte_ia = (self.difficulte_ia + 1) % 4
+            if self.premier_joueur_hovered:
+                self.premier_joueur = (self.premier_joueur + 1) % 2
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
@@ -148,7 +153,16 @@ class Menu:
         if self.mode_ia == 1:
             self.difficulte_hovered = draw_button(
                 screen, font, self.difficulte_text[self.difficulte_ia],
-                pos=(taille[0] // 2, taille[1] // 2 + 4 * taille[1] // 16),
+                pos=(taille[0]//2 - taille[0]//8, taille[1] // 2 + 4 * taille[1] // 16),
+                padding=padding,
+                bg_color=pygame.Color(140, 140, 140),
+                hovered_color=pygame.Color(110, 110, 110),
+                font_color=pygame.Color(0, 0, 0)
+            )
+
+            self.premier_joueur_hovered = draw_button(
+                screen, font, self.premier_joueur_texte[self.premier_joueur],
+                pos=(taille[0]//2 + taille[0]//8, taille[1] // 2 + 4 * taille[1] // 16),
                 padding=padding,
                 bg_color=pygame.Color(140, 140, 140),
                 hovered_color=pygame.Color(110, 110, 110),
@@ -158,7 +172,6 @@ class Menu:
         text_rect = render_text.get_rect(center=rect.center)
         screen.blit(render_text, text_rect)
         
-
 class ConnectFour:
     def __init__(self):
         # les constantes du programme
@@ -227,6 +240,16 @@ class ConnectFour:
                 circle_y = self.plateau_y + ligne*taille_case + taille_case//2
                 pygame.draw.circle(screen, couleur, (circle_x, circle_y), rayon)
 
+    def ia_place(self):
+        """Place un coup si une IA est activée"""
+        if self.ia != None and self.plateau.joueur_a_gagne() == None:
+            self.draw(screen)
+            pygame.display.flip()
+            self.changer_joueur()
+            coup = self.ia.prediction(self.plateau)
+            if coup != None: # si coup == None, un des joueurs a gagné
+                self.plateau.placer(self.joueur_actuel, coup)
+
     def event(self, screen: pygame.Surface, event: pygame.event.Event) -> bool:
         """
         S'occupe d'un seul evenement
@@ -249,13 +272,8 @@ class ConnectFour:
                     return False
 
                 if self.plateau.placer(self.joueur_actuel, colonne):
-                    if self.ia != None and self.plateau.joueur_a_gagne() == None:
-                        self.draw(screen)
-                        self.changer_joueur()
-                        pygame.display.flip()
-                        coup = self.ia.prediction(self.plateau)
-                        if coup != None: # si coup == None, un des joueurs a gagné
-                            self.plateau.placer(self.joueur_actuel, coup)
+                    self.ia_place()
+
                     global LASTWINNER
                     gagner = self.plateau.joueur_a_gagne()
                     if gagner != None:
@@ -310,6 +328,9 @@ while True:
                 current_state = GAME
                 if menu.mode_ia == 1:
                     game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
+                    if menu.premier_joueur == 1:
+                        game.ia_place()
+                        game.changer_joueur()
                 sound.jouer_musique_jeu(menu.mode_ia, menu.difficulte_ia)
         menu.draw(pygame.display.get_surface())
     elif current_state == GAME:
@@ -341,7 +362,7 @@ while True:
             pygame.display.flip()
 
         end_game_ticks += 1
-        if end_game_ticks > 180: # 6 seconds passed
+        if end_game_ticks > 150: # 5 seconds passed
             current_state = MENU
             game = ConnectFour()
     pygame.display.flip()
