@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <stdbool.h>
 #include <math.h>
 #include <string.h>
@@ -13,67 +14,108 @@ typedef enum {
 	HUMAIN = 2
 } Joueur;
 
-typedef struct {
-	Case cases[6][7];
-} Plateau;
-
 const int LIGNES = 6;
 const int COLONNES = 7;
 
+typedef struct {
+	Case cases[6][7];
+} PythonPlateau;
+
+typedef struct {
+	uint64_t robot_mask;
+	uint64_t player_mask;
+} Plateau;
+
 /// renvoie false si le placement n'est pas valide
 static bool place(Plateau *plateau, Joueur player, int col) {
-	if (plateau->cases[0][col] != CASE_VIDE) return false;
+	uint64_t offset = (1 << col);
+	if ((plateau->player_mask | plateau->robot_mask) & offset) return false;
 
-	int ligne_max = 0;
-	while (ligne_max < LIGNES-1) {
-		if (plateau->cases[ligne_max+1][col] != CASE_VIDE) break;
-		ligne_max++;
+	uint64_t limit = offset << 7*LIGNES;
+	while (offset < limit) {
+		if ((plateau->player_mask | plateau->robot_mask) & offset) break;
+
+		offset <<= 7;
 	}
 
-	plateau->cases[ligne_max][col] = (Case)player;
+	offset >>= 7;
+
+	if (player == ROBOT) plateau->robot_mask |= offset;
+	else plateau->player_mask |= offset;
 	return true;
 }
 
-static float evaluate(Plateau *plateau) {
-	float score = 0.0;
+static inline uint8_t count_bits(uint64_t v) {
+	return __builtin_popcountl(v);
+}
 
-	for (int j = 0; j < LIGNES; j++) {
-		for (int i = 0; i < COLONNES; i++) {
-			Case c = plateau->cases[j][i];
-			if (c == CASE_VIDE) continue;
+// void print_bit_flag(uint64_t mask, char c) {
+// 	uint8_t index = 0;
+// 	uint64_t offset = 1;
+// 	while (!(offset & ((uint64_t)1 << 42))) {
+// 		if (mask & offset) printf("%c ", c);
+// 		else printf("` ");
+//
+// 		index += 1;
+// 		if (index % 7 == 0) printf("\n");
+//
+// 		offset <<= 1;
+// 	}
+// 	printf("\n");
+// }
 
-			float multiplier = c == CASE_ROBOT ? 1.0 : -1.0;
+float evaluate(Plateau plateau) {
+	uint64_t rs[2] = { plateau.player_mask, plateau.robot_mask };
+	float score[2] = { 0.0, 0.0 };
 
-			int dirs[][2] = {
-				{ 1, 0 },
-				{ 0, 1 },
-				{ 1, 1 },
-				{ 1,-1 },
-			};
+	static const uint8_t shifts[4][3] = {
+		{ 1, 2, 3 }, // horizontal
+		{ 7, 14, 21 }, // vertical
+		{ 8, 16, 24 }, // diagonal down
+		{ 6, 12, 18 }  // diagonal up
+	};
 
-			for (int dir = 0; dir < 4; dir++) {
-				int idx = 1;
-				while (idx < 4) {
-					int dx = i + dirs[dir][0]*idx;
-					int dy = j + dirs[dir][1]*idx;
+	static const uint64_t bands[4][3] = {
+		{
+			0b111111011111101111110111111011111101111110,
+			0b111110011111001111100111110011111001111100,
+			0b111100011110001111000111100011110001111000,
+		},
+		{
+			0b111111111111111111111111111111111111111111,
+			0b111111111111111111111111111111111111111111,
+			0b111111111111111111111111111111111111111111,
+		},
+		{
+			0b111111011111101111110111111011111101111110,
+			0b111110011111001111100111110011111001111100,
+			0b111100011110001111000111100011110001111000,
+		},
+		{
+			0b011111101111110111111011111101111110111111,
+			0b001111100111110011111001111100111110011111,
+			0b000111100011110001111000111100011110001111
+		}
+	};
 
-					if (dx < 0 || dx >= COLONNES || dy <= 0 || dy >= LIGNES) break;
+	for (int i = 0; i < 2; i++) {
+		uint64_t r = rs[i];
 
-					Case autre = plateau->cases[dy][dx];
-					if (c != autre) break;
+		for (int idx = 0; idx < 4; idx++) {
+			uint64_t mask = r & ((r & bands[idx][0]) >> shifts[idx][0]);
+			score[i] += count_bits(mask);
 
-					idx++;
-				}
+			mask = mask & ((r & bands[idx][1]) >> shifts[idx][1]);
+			score[i] += count_bits(mask) * 5.0;
 
-				if (idx == 2) score += 1.0 * multiplier;
-				else if (idx == 3) score += 5.0 * multiplier;
-				else if (idx == 4) return INFINITY * multiplier;
-			}
+			mask = mask & ((r & bands[idx][2]) >> shifts[idx][2]);
+			if (mask) return INFINITY * (i*2 - 1);
 		}
 	}
 
-	return score;
+	return score[1] - score[0];
 }
+
 
 float maxf(float a, float b) {
 	return a > b ? a : b;
@@ -90,7 +132,7 @@ typedef struct {
 	int profondeur;
 } Minmax;
 
-static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, float alpha, float beta) {
+static Minmax internal_minmax(Plateau plateau, Joueur joueur, int profondeur, float alpha, float beta) {
 	if (profondeur <= 0) {
 		return (Minmax) {
 			.score = evaluate(plateau),
@@ -121,11 +163,11 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
-			Plateau p = *plateau;
+			Plateau p = plateau;
 			if (!place(&p, joueur, col)) continue;
 
-			Minmax coup = internal_minmax(&p, HUMAIN, profondeur - 1, alpha, beta);
-			if (coup.score > m.score || (coup.score == m.score && (coup.score < 0 ^ coup.profondeur > m.profondeur)) || m.profondeur == -1) {
+			Minmax coup = internal_minmax(p, HUMAIN, profondeur - 1, alpha, beta);
+			if (coup.score > m.score || (coup.score == m.score && (coup.score < 0 ^ coup.profondeur > m.profondeur)) || m.coup == -1) {
 				m = coup;
 				m.coup = col;
 			}
@@ -133,17 +175,18 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 			if (m.score > beta) break;
 			alpha = maxf(alpha, m.score);
 		}
+
 		return m;
 	} else {
 		Minmax m = { .score = INFINITY, .coup = -1, .profondeur = -1 };
 		for (int col_idx = 0; col_idx < COLONNES; col_idx++) {
 			int col = ordre_colonnes[col_idx];
 
-			Plateau p = *plateau;
+			Plateau p = plateau;
 			if (!place(&p, joueur, col)) continue;
 
-			Minmax coup = internal_minmax(&p, ROBOT, profondeur - 1, alpha, beta);
-			if (coup.score < m.score || (coup.score == m.score && (coup.score > 0 ^ coup.profondeur > m.profondeur)) || m.profondeur == -1) {
+			Minmax coup = internal_minmax(p, ROBOT, profondeur - 1, alpha, beta);
+			if (coup.score < m.score || (coup.score == m.score && (coup.score > 0 ^ coup.profondeur > m.profondeur)) || m.coup == -1) {
 				m = coup;
 				m.coup = col;
 			}
@@ -156,6 +199,33 @@ static Minmax internal_minmax(Plateau *plateau, Joueur joueur, int profondeur, f
 	}
 }
 
-Minmax minmax(Plateau plateau, Joueur joueur, int profondeur) {
-	return internal_minmax(&plateau, joueur, profondeur, -INFINITY, INFINITY);
+Plateau array_to_bit_flag(Case cases[6][7]) {
+	uint64_t player_mask = 0;
+	uint64_t robot_mask = 0;
+
+	uint64_t index = 1;
+
+	for (int j = 0; j < LIGNES; j++) {
+		for (int i = 0; i < COLONNES; i++) {
+			switch (cases[j][i]) {
+				case CASE_VIDE:
+					break;
+				case CASE_ROBOT:
+					robot_mask |= index;
+					break;
+				case CASE_HUMAIN:
+					player_mask |= index;
+					break;
+			}
+
+			index <<= 1;
+		}
+	}
+
+	return (Plateau) { robot_mask, player_mask };
+}
+
+Minmax minmax(PythonPlateau plateau, Joueur joueur, int profondeur) {
+	Minmax m = internal_minmax(array_to_bit_flag(plateau.cases), joueur, profondeur, -INFINITY, INFINITY);
+	return m;
 }
