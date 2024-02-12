@@ -15,25 +15,26 @@ def draw_button(
     font: pygame.font.Font,
     text: str,
     pos: tuple[int, int],
-    padding: tuple[int, int],
+    size: tuple[int, int],
+    font_color: pygame.Color,
     bg_color: pygame.Color,
-    hovered_color: pygame.Color,
-    font_color: pygame.Color
+    hovered_color: pygame.Color | None = None,
     ) -> bool:
     """Renvoie si le bouton est survolé"""
-    render_text = font.render(text, True, font_color, bg_color)
-    rect = render_text.get_rect()
-    rect.width += padding[0]
-    rect.height += padding[1]
+    pos_x, pos_y = pos
+    size_x, size_y = size
+
+    rect = pygame.Rect(pos_x - size_x/2, pos_y - size_y/2, size_x, size_y)
     rect.center = pos
     hovered = rect_hovered(rect)
-    if hovered:
-        render_text = font.render(text, True, font_color, hovered_color)
+    if hovered and hovered_color != None:
         pygame.draw.rect(screen, hovered_color, rect)
     else:
         pygame.draw.rect(screen, bg_color, rect)
 
-    text_rect = render_text.get_rect(center=rect.center)
+    render_text = font.render(text, True, font_color)
+    text_rect = render_text.get_rect()
+    text_rect.center = pos
     screen.blit(render_text, text_rect)
 
     return hovered
@@ -42,135 +43,161 @@ def rect_hovered(rect: pygame.Rect) -> bool:
     mouse_x, mouse_y = pygame.mouse.get_pos()
     return rect.collidepoint(mouse_x, mouse_y)
 
+def norm_width(screen_w: int, x: int) -> int:
+    return x * screen_w // 1920
+
+def norm_height(screen_h: int, x: int) -> int:
+    return x * screen_h // 1080
+
+def norm_size(screen: pygame.Surface, x: int) -> int:
+    """Normalizes a given value on the width or height, whichever is smaller"""
+    if screen.get_width()/1920 < screen.get_height()/1080:
+        return norm_width(screen.get_width(), x)
+    else:
+        return norm_height(screen.get_height(), x)
+
+def draw_winner(screen: pygame.Surface):
+    screen_w, screen_h = screen.get_size()
+
+    if LASTWINNER != None:
+        font = pygame.font.Font("menu_font.ttf", norm_size(screen, 32))
+
+        if LASTWINNER == 'J1':
+            draw_button(
+                screen, font, "Vainqueur J1",
+                pos=(screen_w // 2, screen_h // 8), size=(norm_width(screen_w, 400), norm_height(screen_h, 48)),
+                font_color=pygame.Color(255, 0, 0),
+                bg_color=pygame.Color(0, 0, 255)
+            )
+        elif LASTWINNER == 'J2':
+            draw_button(
+                screen, font, "Vainqueur J2",
+                pos=(screen_w // 2, screen_h // 8), size=(norm_width(screen_w, 400), norm_height(screen_h, 48)),
+                font_color=pygame.Color(255, 255, 0),
+                bg_color=pygame.Color(0, 0, 255)
+            )
+        else:
+            draw_button(
+                screen, font, "Egalite",
+                pos=(screen_w // 2, screen_h // 8), size=(norm_width(screen_w, 400), norm_height(screen_h, 48)),
+                font_color=pygame.Color(255, 255, 255),
+                bg_color=pygame.Color(0, 0, 255)
+            )
+
 class Menu:
     def __init__(self):
         self.fond = (70, 100, 255)
-        self.launch_hovered = False
-        self.mode_hovered = False
         self.mode_ia = 0
         self.mode_text = ("Joueur contre joueur", "Joueur contre IA")
-        self.difficulte_hovered = False
         self.difficulte_ia = 0
         self.difficulte_text = ("Facile", "Moyen", "Difficile", "Challengeur")
         self.difficulte_profondeur = (5, 8, 10, 12)
         self.premier_joueur = 0
         self.premier_joueur_texte = ("1er joueur: Humain", "1er joueur: Robot")
-        self.premier_joueur_hovered = False
 
-    def event(self, event: pygame.event.Event) -> bool:
+    def draw(self, screen: pygame.Surface) -> bool:
         """Renvoie si le bouton de lancement a été cliqué ou non"""
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN: 
-            if self.launch_hovered:
-                return True
-            if self.mode_hovered:
-                # boucle `mode_ia` entre 0 et 1
-                self.mode_ia = (self.mode_ia + 1) % 2
-            if self.difficulte_hovered:
-                self.difficulte_ia = (self.difficulte_ia + 1) % 4
-            if self.premier_joueur_hovered:
-                self.premier_joueur = (self.premier_joueur + 1) % 2
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
-        return False
-
-    def draw(self, screen: pygame.Surface):
         screen.fill(self.fond)
 
-        taille = screen.get_size()
-        menu_largeur = 1000 * taille[0] // 1920
-        menu_hauteur = 700 * taille[1] // 1080
+        screen_w, screen_h = screen.get_size()
+        def norm_w(x: int) -> int:
+            return norm_width(screen_w, x)
+        def norm_h(x: int) -> int:
+            return norm_height(screen_h, x)
+        def norm_s(x: int) -> int:
+            return norm_size(screen, x)
+
+        menu_largeur = norm_w(1200)
+        menu_hauteur = norm_h(700)
         menu_rect = pygame.Rect(
-            (taille[0] - menu_largeur)//2,
-            (taille[1] - menu_hauteur)//2,
+            (screen_w - menu_largeur)//2,
+            (screen_h - menu_hauteur)//2,
             menu_largeur,
             menu_hauteur
         )
         pygame.draw.rect(screen, (125, 125, 125), menu_rect)
 
-        padding = (100 * taille[0] // 1920, 50 * taille[1] // 1080)
-
-        font = pygame.font.Font("menu_font.ttf", 56 * taille[1] // 1080)
+        font = pygame.font.Font("menu_font.ttf", norm_s(56))
         draw_button(
             screen, font, "Puissance 4",
-            pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 4),
-            padding=padding,
+            pos=(screen_w // 2, screen_h // 4),
+            size=(norm_w(12 * 56), norm_h(90)),
+            font_color=pygame.Color(255, 255, 0),
             bg_color=pygame.Color(255, 0, 0),
-            hovered_color=pygame.Color(255, 0, 0),
-            font_color=pygame.Color(255, 255, 0)
         )
 
-        font = pygame.font.Font("menu_font.ttf", 48 * taille[1] // 1080)
-        self.launch_hovered = draw_button(
+        font = pygame.font.Font("menu_font.ttf", norm_s(48))
+        launch_hovered = draw_button(
             screen, font, "Play",
-            pos=(taille[0] // 2, taille[1] // 2 - taille[1] // 16),
-            padding=padding,
+            pos=(screen_w//2 - menu_largeur//2 + norm_w(185), screen_h // 2),
+            size=(norm_w(300), norm_h(80)),
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
             font_color=pygame.Color(0, 0, 0)
         )
 
-        font = pygame.font.Font("menu_font.ttf", 26 * taille[1] // 1080)
-        render_text = font.render("mode actuel :", True, (255,  255,  255), (125, 125, 125))
-        rect = render_text.get_rect()
-        rect.width += 20
-        rect.height += 10
-        rect.center = (taille[0] // 2, taille[1] // 2 + taille[1] // 20)
-        text_rect = render_text.get_rect(center=rect.center)
-        screen.blit(render_text, text_rect)
-
-
-        if LASTWINNER!=None:
-            font = pygame.font.Font("menu_font.ttf", 32 * taille[1] // 1080)
-
-            render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
-            if LASTWINNER=='J2':
-                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
-            elif LASTWINNER=='J1':
-                render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
-            else:
-                render_text = font.render("egalite ", True, (0,  0,  0), (0, 0, 255))
-            rect = render_text.get_rect()
-            rect.width += 20
-            rect.height += 10
-            rect.center = (taille[0] // 2, taille[1] // 7)
-            text_rect = render_text.get_rect(center=rect.center)
-            screen.blit(render_text, text_rect)
-
-        self.mode_hovered = draw_button(
+        mode_ia_x = screen_w//2 + menu_largeur//2 - norm_w(435)
+        mode_hovered = draw_button(
             screen, font, self.mode_text[self.mode_ia],
-            pos=(taille[0] // 2, taille[1] // 2 + 2 * taille[1] // 16),
-            padding=padding,
+            pos=(mode_ia_x, screen_h // 2),
+            size=(norm_w(800), norm_h(80)),
+            font_color=pygame.Color(0, 0, 0),
             bg_color=pygame.Color(140, 140, 140),
             hovered_color=pygame.Color(110, 110, 110),
-            font_color=pygame.Color(0, 0, 0)
         )
 
+        def draw_indic(center_x: int, size_x: int, top_y: int, chosen_idx: int, num: int):
+            for i in range(num):
+                indic_rect = pygame.Rect(center_x - size_x//2 + i*size_x//num, top_y, size_x//num, norm_h(5))
+                color = pygame.Color(255, 255, 255) if i == chosen_idx else pygame.Color(180, 180, 180)
+                pygame.draw.rect(screen, color, indic_rect)
+
+        draw_indic(mode_ia_x, norm_w(800), screen_h//2 + norm_h(35), self.mode_ia, 2)
+
+        difficulte_hovered = False
+        premier_joueur_hovered = False
         if self.mode_ia == 1:
-            self.difficulte_hovered = draw_button(
+            difficulte_hovered = draw_button(
                 screen, font, self.difficulte_text[self.difficulte_ia],
-                pos=(taille[0]//2 - taille[0]//8, taille[1] // 2 + 4 * taille[1] // 16),
-                padding=padding,
+                pos=(mode_ia_x, screen_h // 2 + norm_h(100)),
+                size=(norm_w(700), norm_h(80)),
+                font_color=pygame.Color(0, 0, 0),
                 bg_color=pygame.Color(140, 140, 140),
-                hovered_color=pygame.Color(110, 110, 110),
-                font_color=pygame.Color(0, 0, 0)
+                hovered_color=pygame.Color(110, 110, 110)
             )
+            draw_indic(mode_ia_x, norm_w(700), screen_h//2 + norm_h(135), self.difficulte_ia, 4)
 
-            self.premier_joueur_hovered = draw_button(
+            premier_joueur_hovered = draw_button(
                 screen, font, self.premier_joueur_texte[self.premier_joueur],
-                pos=(taille[0]//2 + taille[0]//8, taille[1] // 2 + 4 * taille[1] // 16),
-                padding=padding,
+                pos=(mode_ia_x, screen_h // 2 + norm_h(200)),
+                size=(norm_w(700), norm_h(80)),
+                font_color=pygame.Color(0, 0, 0),
                 bg_color=pygame.Color(140, 140, 140),
-                hovered_color=pygame.Color(110, 110, 110),
-                font_color=pygame.Color(0, 0, 0)
+                hovered_color=pygame.Color(110, 110, 110)
             )
+            draw_indic(mode_ia_x, norm_w(700), screen_h//2 + norm_h(235), self.premier_joueur, 2)
 
-        text_rect = render_text.get_rect(center=rect.center)
-        screen.blit(render_text, text_rect)
+        draw_winner(screen)
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN: 
+                if launch_hovered:
+                    return True
+                if mode_hovered:
+                    # boucle `mode_ia` entre 0 et 1
+                    self.mode_ia = (self.mode_ia + 1) % 2
+                if difficulte_hovered:
+                    self.difficulte_ia = (self.difficulte_ia + 1) % 4
+                if premier_joueur_hovered:
+                    self.premier_joueur = (self.premier_joueur + 1) % 2
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+                    sys.exit()
+        return False
         
 class ConnectFour:
     def __init__(self):
@@ -274,6 +301,9 @@ class ConnectFour:
                 if self.plateau.placer(self.joueur_actuel, colonne):
                     self.ia_place()
 
+                    # éviter d'accumuler les inputs
+                    pygame.event.clear()
+
                     global LASTWINNER
                     gagner = self.plateau.joueur_a_gagne()
                     if gagner != None:
@@ -323,16 +353,14 @@ sound.jouer_musique_menu()
 
 while True:
     if current_state == MENU:
-        for event in pygame.event.get():
-            if menu.event(event):
-                current_state = GAME
-                if menu.mode_ia == 1:
-                    game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
-                    if menu.premier_joueur == 1:
-                        game.ia_place()
-                        game.changer_joueur()
-                sound.jouer_musique_jeu(menu.mode_ia, menu.difficulte_ia)
-        menu.draw(pygame.display.get_surface())
+        if menu.draw(pygame.display.get_surface()):
+            current_state = GAME
+            if menu.mode_ia == 1:
+                game.ia = minmax.Minmax(menu.difficulte_profondeur[menu.difficulte_ia])
+                if menu.premier_joueur == 1:
+                    game.ia_place()
+                    game.changer_joueur()
+            sound.jouer_musique_jeu(menu.mode_ia, menu.difficulte_ia)
     elif current_state == GAME:
         for event in pygame.event.get():
             if game.event(screen, event):
@@ -342,27 +370,11 @@ while True:
                 sound.jouer_musique_menu()
         game.draw(screen)
     else:
-        if LASTWINNER != None:
-            taille = screen.get_size()
-            font = pygame.font.Font("menu_font.ttf", 32)
-
-            render_text= font.render("", True, (255,  255,  0), (0, 0, 255))
-            if LASTWINNER =='J1':
-                render_text = font.render("Vainqueur J1 ", True, (255,  0,  0), (0, 0, 255))
-            elif LASTWINNER =='J2':
-                render_text = font.render("Vainqueur J2 ", True, (255,  255,  0), (0, 0, 255))
-            else:
-                render_text = font.render("egalite ", True, (0,  0,  0), (0, 0, 255))
-            rect = render_text.get_rect()
-            rect.width += 20
-            rect.height += 10
-            rect.center = (taille[0] // 2, taille[1] // 7)
-            text_rect = render_text.get_rect(center=rect.center)
-            screen.blit(render_text, text_rect)
-            pygame.display.flip()
+        draw_winner(screen)
 
         end_game_ticks += 1
         if end_game_ticks > 150: # 5 seconds passed
+            pygame.event.clear()
             current_state = MENU
             game = ConnectFour()
     pygame.display.flip()
