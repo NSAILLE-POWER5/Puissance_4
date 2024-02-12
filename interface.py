@@ -276,6 +276,8 @@ class ConnectFour:
             coup = self.ia.prediction(self.plateau)
             if coup != None: # si coup == None, un des joueurs a gagné
                 self.plateau.placer(self.joueur_actuel, coup)
+            if menu.difficulte_ia != 3:
+                pygame.time.delay(2000)
 
     def event(self, screen: pygame.Surface, event: pygame.event.Event) -> bool:
         """
