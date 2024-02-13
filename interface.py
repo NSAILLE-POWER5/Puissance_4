@@ -1,5 +1,6 @@
 import pygame
 import sys
+import time
 
 from pygame.math import clamp
 
@@ -273,11 +274,13 @@ class ConnectFour:
             self.draw(screen)
             pygame.display.flip()
             self.changer_joueur()
+            start_time = time.time()
             coup = self.ia.prediction(self.plateau)
             if coup != None: # si coup == None, un des joueurs a gagné
                 self.plateau.placer(self.joueur_actuel, coup)
-            if menu.difficulte_ia != 3:
-                pygame.time.delay(2000)
+            diff_time = time.time() - start_time
+            if diff_time < 0.5:
+                time.sleep(diff_time)
 
     def event(self, screen: pygame.Surface, event: pygame.event.Event) -> bool:
         """
