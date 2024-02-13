@@ -3,6 +3,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <pthread.h>
+
 typedef enum {
 	CASE_VIDE,
 	CASE_ROBOT = 1,
@@ -225,7 +227,54 @@ Plateau array_to_bit_flag(Case cases[6][7]) {
 	return (Plateau) { robot_mask, player_mask };
 }
 
-Minmax minmax(PythonPlateau plateau, Joueur joueur, int profondeur) {
-	Minmax m = internal_minmax(array_to_bit_flag(plateau.cases), joueur, profondeur, -INFINITY, INFINITY);
+struct MinmaxThreadArgs {
+	Plateau plateau;
+	int profondeur;
+	Minmax result;
+	bool valid;
+};
+
+void *internal_minmax_multithread(void *void_arg) {
+	struct MinmaxThreadArgs *arg = void_arg;
+
+	arg->result = internal_minmax(arg->plateau, HUMAIN, arg->profondeur, -INFINITY, INFINITY);
+
+	return NULL;
+}
+
+Minmax minmax(PythonPlateau py_plateau, int profondeur) {
+	Plateau plateau = array_to_bit_flag(py_plateau.cases);
+
+	// don't bother multithreading if the depth is small enough
+	if (profondeur <= 7) return internal_minmax(plateau, ROBOT, profondeur, -INFINITY, INFINITY);
+
+	struct MinmaxThreadArgs args[7];
+	pthread_t handles[7];
+	for (int col = 0; col < COLONNES; col++) {
+		struct MinmaxThreadArgs *arg = &args[col];
+		arg->plateau = plateau;
+		if (!place(&arg->plateau, ROBOT, col)) {
+			args[col].valid = false;
+			continue;
+		};
+
+		arg->profondeur = profondeur - 1;
+		arg->valid = true;
+
+		pthread_create(&handles[col], NULL, internal_minmax_multithread, (void *)arg);
+	}
+
+	Minmax m = { .score = -INFINITY, .coup = -1, .profondeur = -1 };
+	for (int col = 0; col < COLONNES; col++) {
+		if (!args[col].valid) continue;
+		pthread_join(handles[col], NULL);
+
+		Minmax coup = args[col].result;
+		if (coup.score > m.score || (coup.score == m.score && (coup.score < 0 ^ coup.profondeur > m.profondeur)) || m.coup == -1) {
+			m = coup;
+			m.coup = col;
+		}
+	}
+
 	return m;
 }

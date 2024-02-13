@@ -45,12 +45,12 @@ class Minmax(Ia):
         libminmax = cdll.LoadLibrary("ia/" + library_name)
 
         self.minmax = libminmax.minmax
-        self.minmax.argtypes = [C_PLATEAU, c_int, c_int]
+        self.minmax.argtypes = [C_PLATEAU, c_int]
         self.minmax.restype = C_MINMAX
         self.profondeur = profondeur
 
     def prediction(self, plateau: Plateau) -> int | None:
         p = plateau_convertion(plateau)
         # arguments: plateau, joueur, profondeur
-        m = self.minmax(p, C_CASE_ROBOT, self.profondeur)
+        m = self.minmax(p, self.profondeur)
         return None if m.coup == -1 else m.coup
